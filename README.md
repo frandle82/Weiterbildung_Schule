@@ -12,6 +12,7 @@ Schulinterne Fortbildungen und Jahresbelehrungen.
 
 ### Datenschutz – Jahresbelehrung 2026/27
 - [Präsentation](https://frandle82.github.io/Weiterbildung_Schule/Weiterbildungen/Datenschutz-Jahresbelehrung-2026/Praesentation_Datenschutz.html)
+- [Teilnahmenachweis (20 Personen, A4)](https://frandle82.github.io/Weiterbildung_Schule/Weiterbildungen/Datenschutz-Jahresbelehrung-2026/Teilnahmenachweis_Datenschutz.html)
 - [Handout (im Browser als PDF druckbar)](https://frandle82.github.io/Weiterbildung_Schule/Weiterbildungen/Datenschutz-Jahresbelehrung-2026/Handout_Datenschutz.html)
 
 ## Ordnerstruktur
