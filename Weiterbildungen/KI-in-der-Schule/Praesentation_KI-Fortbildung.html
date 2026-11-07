@@ -1,0 +1,3798 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>Künstliche Intelligenz im Schulalltag – Fortbildung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fach: #20213a;
+      --fach-deep: #16172b;
+      --fach-light: #6c4ff8;
+      --ink: #20213a;
+      --sub: #66677d;
+      --bg: #f7f6fc;
+      --card: #ffffff;
+      --card-border: #e8e5f3;
+      --accent-a: #8b5cf6;
+      --accent-b: #ff6f61;
+      --accent-c: #17b897;
+      --warn-bg: #fff4dc;
+      --warn-border: #f2b84b;
+      --info-bg: #ece8ff;
+      --danger-bg: #ffe7e3;
+      --danger-border: #e75b50;
+      --serif: "General Sans", "Avenir Next", Arial, sans-serif;
+      --mono: "Inter", "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --app-height: 100vh;
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-r: env(safe-area-inset-right, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-l: env(safe-area-inset-left, 0px);
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      font-family: var(--serif);
+      color: var(--ink);
+    }
+
+    body {
+      overflow: hidden;
+      height: var(--app-height);
+    }
+
+    /* ---------- progress bar ---------- */
+    #progress-track {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 7px;
+      height: var(--app-height);
+      background: var(--accent-a);
+      z-index: 50;
+    }
+
+    #progress-mask {
+      position: fixed;
+      left: 0;
+      width: 7px;
+      height: var(--app-height);
+      top: 0;
+      background: var(--fach);
+      z-index: 51;
+      transition: top .35s ease;
+    }
+
+    #progress-dot {
+      position: fixed;
+      left: -4px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent-a);
+      border: 2px solid var(--fach);
+      box-shadow: none;
+      z-index: 52;
+      transition: top .35s ease, border-color .35s ease;
+      transform: translateY(-50%);
+    }
+
+    /* ---------- shell ---------- */
+    #deck {
+      position: relative;
+      width: 100%;
+      height: var(--app-height);
+      padding-left: 7px;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      left: 7px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: clamp(16px, 3.5vh, 44px) clamp(50px, 5vw, 90px) clamp(44px, 7.5vh, 76px) clamp(50px, 5vw, 90px);
+      padding-right: calc(clamp(50px, 5vw, 90px) + var(--safe-r));
+      padding-left: calc(clamp(50px, 5vw, 90px) + var(--safe-l));
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(24px);
+      transition: opacity .35s ease, transform .35s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .kicker {
+      font-family: var(--mono);
+      font-size: clamp(.8rem, .7rem + .35vw, 1.05rem);
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--fach);
+      margin: 0 0 .8rem 0;
+    }
+
+    h1.title {
+      font-family: var(--serif);
+      font-size: clamp(2.3rem, 1.5rem + 3vw, 4.0rem);
+      line-height: 1.05;
+      letter-spacing: -.025em;
+      margin: 0 0 .65rem 0;
+      color: var(--fach);
+      font-weight: 600;
+      overflow-wrap: break-word;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      font-size: clamp(1.18rem, 1rem + .7vw, 1.55rem);
+      color: var(--sub);
+      margin: 0 0 1.6rem 0;
+      font-weight: 400;
+    }
+
+    .lead {
+      font-size: clamp(1.3rem, 1.1rem + .85vw, 1.85rem);
+      line-height: 1.4;
+      color: var(--ink);
+      max-width: 60ch;
+      margin: .35rem 0 1.45rem 0;
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* editorial visuals */
+    .model-split .steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .65rem;
+    }
+
+    .model-split .step {
+      min-width: 0;
+    }
+
+    .model-split .arrow {
+      display: none;
+    }
+
+    .cards.stacked {
+      grid-template-columns: 1fr;
+      gap: .7rem;
+    }
+
+    .cards.stacked .card {
+      padding: .75rem 1rem;
+    }
+
+    .cards.stacked .card p {
+      font-size: .9rem;
+    }
+
+    /* cover slide */
+    .cover {
+      display: grid;
+      grid-template-columns: minmax(280px, .82fr) minmax(420px, 1.18fr);
+      grid-template-rows: auto auto auto 1fr;
+      column-gap: clamp(1.5rem, 4vw, 3.2rem);
+      align-content: center;
+      align-items: start;
+      overflow: hidden;
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .cover .content {
+      display: contents;
+    }
+
+    .cover .kicker {
+      grid-column: 1;
+      grid-row: 1;
+      position: relative;
+      z-index: 3;
+      color: var(--accent-a);
+      font-size: clamp(.85rem, .72rem + .4vw, 1.1rem);
+    }
+
+    .cover h1.title {
+      grid-column: 1;
+      grid-row: 2;
+      position: relative;
+      z-index: 3;
+      color: var(--accent-a);
+      font-size: clamp(2.8rem, 1.5rem + 4.5vw, 5.2rem);
+      line-height: .95;
+      max-width: 11ch;
+    }
+
+    .cover .subtitle {
+      grid-column: 1;
+      grid-row: 3;
+      position: relative;
+      z-index: 3;
+      color: var(--bg);
+      font-size: clamp(1.25rem, 1rem + .8vw, 1.6rem);
+      max-width: 32ch;
+    }
+
+    .cover .meta {
+      grid-column: 1;
+      grid-row: 4;
+      position: relative;
+      z-index: 3;
+      margin-top: 1.2rem;
+      font-family: var(--mono);
+      font-size: .95rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent-a);
+      border-top: 2px solid var(--accent-a);
+      padding-top: 1rem;
+      align-self: start;
+    }
+
+    .closing {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .closing,
+    .slide-summary {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .closing h1.title,
+    .slide-summary h1.title {
+      color: var(--accent-a);
+    }
+
+    .closing .kicker,
+    .slide-summary .kicker {
+      color: var(--accent-a);
+    }
+
+    .closing p {
+      color: var(--bg);
+    }
+
+    .closing h1.title {
+      font-size: clamp(2.8rem, 2rem + 3vw, 5rem);
+    }
+
+    .slide-summary .num-list li {
+      border-color: var(--accent-a);
+    }
+
+    .slide-summary .num-list .n {
+      border-color: var(--accent-a);
+      color: var(--accent-a);
+    }
+
+    .slide-summary .num-list .t {
+      color: var(--bg);
+    }
+
+    .slide-pink {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+    }
+
+    .slide-pink h1.title,
+    .slide-pink .kicker {
+      color: var(--fach-deep);
+    }
+
+    /* cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .cards.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card {
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: 1rem 1.2rem;
+    }
+
+    .card h2 {
+      margin: 0 0 .45rem 0;
+      font-size: clamp(1.2rem, 1.05rem + .4vw, 1.45rem);
+      line-height: 1.1;
+      font-weight: 600;
+      color: var(--fach);
+    }
+
+    .card p {
+      margin: 0;
+      font-size: clamp(1.05rem, .95rem + .3vw, 1.25rem);
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .cards>.card:nth-child(3n+1) {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .cards>.card:nth-child(3n+1) h2 {
+      color: var(--accent-a);
+    }
+
+    .cards>.card:nth-child(3n+1) p {
+      color: var(--bg);
+    }
+
+    .cards>.card:nth-child(3n+2) {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--accent-b);
+    }
+
+    .cards>.card:nth-child(3n+2) h2,
+    .cards>.card:nth-child(3n+2) p {
+      color: var(--fach-deep);
+    }
+
+    /* timeline */
+    .timeline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 2.5rem;
+    }
+
+    .timeline h3 {
+      color: var(--fach);
+      font-family: var(--mono);
+      font-size: .95rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin: 0 0 .6rem 0;
+    }
+
+    .t-item {
+      display: flex;
+      gap: 1rem;
+      padding: .46rem 0;
+      border-bottom: 1px solid rgba(46, 74, 42, .42);
+      align-items: baseline;
+    }
+
+    .t-item .time {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--fach);
+      min-width: 3.8rem;
+      font-size: 1.05rem;
+    }
+
+    .t-item .what {
+      font-size: 1.15rem;
+    }
+
+    .timeline-note {
+      grid-column: 1/-1;
+      margin-top: .8rem;
+      font-size: 1.05rem;
+      color: var(--sub);
+      font-style: italic;
+    }
+
+    /* options / blitzlicht */
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .option {
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: 1.1rem;
+      text-align: left;
+    }
+
+    .option:nth-child(1) {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .option:nth-child(2) {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--accent-b);
+    }
+
+    .option .name {
+      font-family: var(--mono);
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--fach);
+      font-size: .95rem;
+      margin-bottom: .5rem;
+    }
+
+    .option:nth-child(1) .name,
+    .option:nth-child(1) .quote {
+      color: var(--accent-a);
+    }
+
+    .option .quote {
+      font-style: italic;
+      color: var(--sub);
+      font-size: 1.18rem;
+    }
+
+    /* numbered steps horizontal */
+    .steps {
+      display: flex;
+      align-items: stretch;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      flex: 1;
+      min-width: 150px;
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: 1rem;
+      position: relative;
+    }
+
+    .step:nth-of-type(1) {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .step:nth-of-type(5) {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--accent-b);
+    }
+
+    .step .num {
+      display: block;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      background: none;
+      color: var(--fach);
+      font-family: var(--mono);
+      font-size: .9rem;
+      letter-spacing: .14em;
+      font-weight: 600;
+      margin-bottom: .55rem;
+    }
+
+    .step:nth-of-type(1) .num {
+      color: var(--accent-a);
+    }
+
+    .step .txt {
+      font-size: 1.15rem;
+      line-height: 1.4;
+    }
+
+    .arrow {
+      align-self: center;
+      font-size: 1.8rem;
+      color: var(--fach);
+      padding: 0 .2rem;
+    }
+
+    /* numbered vertical list */
+    .num-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+    }
+
+    .num-list li {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--fach);
+      border-radius: 0;
+      padding: .72rem .15rem;
+    }
+
+    .num-list .n {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 2px solid var(--fach);
+      background: transparent;
+      color: var(--fach);
+      font-family: var(--mono);
+      font-size: .95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .num-list .t {
+      font-size: 1.25rem;
+      line-height: 1.4;
+    }
+
+    /* two column compare */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .compare .col {
+      border-radius: 6px;
+      padding: 1.2rem;
+    }
+
+    .compare .weak {
+      background: var(--accent-a);
+      border: 2px solid var(--accent-b);
+      color: var(--fach-deep);
+    }
+
+    .compare .strong {
+      background: var(--fach);
+      border: 2px solid var(--fach);
+      color: var(--bg);
+    }
+
+    .compare .pair {
+      background: var(--card);
+      border: 2px solid var(--fach);
+      color: var(--ink);
+    }
+
+    .compare h3 {
+      margin: 0 0 .5rem 0;
+      font-size: 1.25rem;
+    }
+
+    .compare .weak h3 {
+      color: var(--fach-deep);
+    }
+
+    .compare .strong h3 {
+      color: var(--accent-a);
+    }
+
+    .compare .strong p,
+    .compare .strong li {
+      color: var(--bg);
+    }
+
+    .compare .pair h3 {
+      color: var(--fach);
+    }
+
+    .compare .prompt {
+      font-family: Consolas, Menlo, monospace;
+      font-size: 1.12rem;
+      background: rgba(0, 0, 0, .04);
+      border-radius: 6px;
+      padding: .6rem .8rem;
+      margin: .5rem 0;
+      line-height: 1.5;
+    }
+
+    .compare .result {
+      font-size: 1.1rem;
+      color: var(--sub);
+      font-style: italic;
+    }
+
+    .compare.stacked {
+      grid-template-columns: 1fr;
+      gap: .75rem;
+    }
+
+    .compare.stacked .col {
+      padding: 1rem;
+    }
+
+    /* workflow arrow chains (Schritt → Schritt) */
+    .slider-flow {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      letter-spacing: .01em;
+      color: var(--sub);
+    }
+
+    /* AI-generated infographic example */
+    .infografik-panel {
+      background: #fff;
+      border: 2px solid var(--fach);
+      border-radius: 10px;
+      padding: 1rem 1.1rem .8rem;
+      margin: 1rem 0;
+    }
+
+    .infografik-panel svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .infografik-caption {
+      font-size: .95rem;
+      color: var(--sub);
+      font-style: italic;
+      margin-top: .4rem;
+      text-align: right;
+    }
+
+    /* Ebene 3: Vertiefung auf Abruf (Accordion) */
+    .reveal-accordion {
+      margin-top: 1rem;
+    }
+
+    .reveal-trigger {
+      font-family: var(--mono);
+      font-size: .95rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--fach);
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: .6rem 1rem;
+      cursor: pointer;
+    }
+
+    .reveal-trigger:hover,
+    .reveal-trigger:focus-visible {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .reveal-trigger[aria-expanded="true"]::after {
+      content: " (schließen)";
+    }
+
+    .reveal-panel {
+      margin-top: .8rem;
+      animation: reveal-fade .35s ease;
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      .reveal-panel {
+        animation: none;
+      }
+    }
+
+    @keyframes reveal-fade {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ---------- v3: Desktop-Informationshierarchie (info-primary/secondary/tertiary) ---------- */
+    /* Alle drei Ebenen bleiben auf dem Desktop dauerhaft sichtbar; Hierarchie entsteht rein über
+     Größe/Kontrast/Abstand, nicht über automatischen Wechsel. Ebene 3 klappt bei schmalem Viewport
+     weg, Ebene 2+3 bei Smartphone-Breite. Keine automatische Rotation von Inhalten. */
+    .info-primary {
+      opacity: 1;
+    }
+
+    .info-secondary {
+      opacity: .88;
+      font-size: .98em;
+    }
+
+    .info-tertiary {
+      opacity: .75;
+      font-size: .92em;
+    }
+
+    .info-block {
+      margin: 1rem 0;
+    }
+
+    .info-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: .85rem;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      margin-bottom: .45rem;
+      opacity: .95;
+    }
+
+    .info-secondary .info-label {
+      color: var(--accent-a);
+    }
+
+    .info-tertiary .info-label {
+      color: var(--sub);
+    }
+
+    .info-matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .86rem;
+    }
+
+    .info-matrix th,
+    .info-matrix td {
+      border: 1px solid var(--card-border);
+      padding: .5rem .7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .info-matrix th {
+      font-family: var(--mono);
+      font-size: .7rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      background: var(--card);
+    }
+
+    .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem .6rem;
+      font-size: .82rem;
+    }
+
+    .info-tags span {
+      white-space: nowrap;
+    }
+
+    .info-tags span:not(:last-child)::after {
+      content: "·";
+      margin-left: .6rem;
+      opacity: .6;
+    }
+
+    @media (max-width:1099px) {
+      .info-tertiary {
+        display: none;
+      }
+    }
+
+    @media (max-width:699px) {
+
+      .info-secondary,
+      .info-tertiary {
+        display: none !important;
+      }
+
+      [data-mobile-hint] {
+        display: block !important;
+        font-weight: 700;
+        margin-top: .6rem;
+      }
+    }
+
+    /* KARFF formula */
+    .karff {
+      display: flex;
+      gap: .8rem;
+      flex-wrap: wrap;
+    }
+
+    .kletter {
+      flex: 1;
+      min-width: 170px;
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: left;
+    }
+
+    .kletter:nth-child(2),
+    .kletter:nth-child(5) {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .kletter:nth-child(3) {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--accent-b);
+    }
+
+    .kletter .big {
+      font-family: var(--serif);
+      font-size: 2.8rem;
+      font-weight: 500;
+      color: var(--fach);
+      line-height: .9;
+    }
+
+    .kletter:nth-child(2) .big,
+    .kletter:nth-child(5) .big {
+      color: var(--accent-a);
+    }
+
+    .kletter .word {
+      font-weight: 500;
+      margin: .45rem 0;
+    }
+
+    .kletter .desc {
+      font-size: .85rem;
+      color: var(--sub);
+    }
+
+    /* annotated prompt */
+    .prompt-box {
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: 1.2rem 1.4rem;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .an-rolle {
+      background: var(--accent-a);
+      border-bottom: 2px solid var(--accent-b);
+    }
+
+    .an-kontext {
+      background: var(--card);
+      border-bottom: 2px solid var(--fach);
+    }
+
+    .an-aufgabe {
+      background: var(--fach);
+      color: var(--bg);
+      border-bottom: 2px solid var(--accent-a);
+    }
+
+    .an-format {
+      background: var(--accent-a);
+      border-bottom: 2px solid var(--fach);
+    }
+
+    .an-fein {
+      background: var(--card);
+      border-bottom: 2px solid var(--accent-b);
+    }
+
+    .legend {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: .88rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .legend span:nth-child(1) i,
+    .legend span:nth-child(4) i {
+      background: var(--accent-a) !important;
+      border-color: var(--accent-b) !important;
+    }
+
+    .legend span:nth-child(2) i,
+    .legend span:nth-child(5) i {
+      background: var(--card) !important;
+      border-color: var(--fach) !important;
+    }
+
+    .legend span:nth-child(3) i {
+      background: var(--fach) !important;
+      border-color: var(--accent-a) !important;
+    }
+
+    /* generic table */
+    table.deck-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+    }
+
+    table.deck-table th {
+      background: var(--fach);
+      color: var(--accent-a);
+      font-family: var(--mono);
+      font-size: .76rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: .65rem .8rem;
+    }
+
+    table.deck-table td {
+      border: 1px solid var(--fach);
+      padding: .65rem .8rem;
+      vertical-align: top;
+    }
+
+    /* boxes */
+    .box {
+      border-radius: 0;
+      padding: .82rem 1rem;
+      margin-top: .7rem;
+      font-size: .98rem;
+      line-height: 1.45;
+      border-top: 2px solid var(--fach);
+    }
+
+    .box-merk {
+      background: transparent;
+      border-color: var(--fach);
+    }
+
+    .box-warn {
+      background: var(--card);
+      border-color: var(--accent-b);
+    }
+
+    .box-danger {
+      background: var(--accent-a);
+      border-color: var(--fach);
+      color: var(--fach-deep);
+    }
+
+    .box b {
+      color: var(--fach);
+    }
+
+    .box-warn b {
+      color: var(--accent-b);
+    }
+
+    .box-danger b {
+      color: var(--danger-border);
+    }
+
+    /* praxisphase */
+    .praxis {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .praxis ol {
+      margin: 0;
+      padding-left: 1.2rem;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .praxis ol li {
+      margin-bottom: .4rem;
+    }
+
+    .side-panel {
+      background: var(--fach);
+      color: var(--bg);
+      border-radius: 6px;
+      padding: 1.2rem;
+      border: 2px solid var(--fach);
+    }
+
+    .side-panel .ab {
+      color: var(--accent-a);
+      font-family: var(--serif);
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: 500;
+      margin-bottom: .5rem;
+    }
+
+    .side-panel .zeit {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: .6rem 0 .3rem 0;
+    }
+
+    .side-panel .tip {
+      font-size: .88rem;
+      opacity: .9;
+      margin-top: .6rem;
+    }
+
+    /* stations grid */
+    .stations {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: .9rem;
+    }
+
+    .stations.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .station {
+      background: var(--card);
+      border: 2px solid var(--fach);
+      border-radius: 6px;
+      padding: .9rem 1.1rem;
+      display: flex;
+      gap: .8rem;
+      align-items: flex-start;
+    }
+
+    .station:nth-child(3n+1) {
+      background: var(--fach);
+      color: var(--bg);
+    }
+
+    .station:nth-child(3n+2) {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--accent-b);
+    }
+
+    .station .snum {
+      font-family: var(--mono);
+      font-weight: 500;
+      color: var(--fach);
+      font-size: .82rem;
+      letter-spacing: .1em;
+      min-width: 1.6rem;
+    }
+
+    .station:nth-child(3n+1) .snum,
+    .station:nth-child(3n+1) h3,
+    .station:nth-child(3n+1) p {
+      color: var(--accent-a);
+    }
+
+    .station h3 {
+      margin: 0 0 .2rem 0;
+      font-size: 1rem;
+    }
+
+    .station p {
+      margin: 0;
+      font-size: .88rem;
+      color: var(--sub);
+    }
+
+    /* KI-Ampel Schule */
+    .ampel-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .ampel-tile {
+      border-radius: 18px;
+      padding: 1.1rem 1.2rem;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 28px rgba(43, 35, 83, .08);
+      background: var(--card);
+    }
+
+    .ampel-tile .glyph {
+      font-size: 1.8rem;
+      line-height: 1;
+      display: block;
+      margin-bottom: .5rem;
+    }
+
+    .ampel-tile .label {
+      font-family: "General Sans", sans-serif;
+      font-weight: 800;
+      font-size: .76rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .45rem;
+    }
+
+    .ampel-tile p {
+      margin: 0;
+      font-size: .86rem;
+      line-height: 1.42;
+      color: var(--ink);
+    }
+
+    .ampel-tile.rot {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+    }
+
+    .ampel-tile.rot .label {
+      color: var(--danger-border);
+    }
+
+    .ampel-tile.gelb {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+    }
+
+    .ampel-tile.gelb .label {
+      color: #8a5a00;
+    }
+
+    .ampel-tile.blau {
+      background: #e8f0ff;
+      border-color: #2f6fed;
+    }
+
+    .ampel-tile.blau .label {
+      color: #2352b3;
+    }
+
+    .ampel-tile.gruen {
+      background: #e6f7f1;
+      border-color: var(--accent-c);
+    }
+
+    .ampel-tile.gruen .label {
+      color: #0e7a5f;
+    }
+
+    @media (max-width:1099px) {
+      .ampel-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width:640px) {
+      .ampel-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* footer bar */
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 7px;
+      right: 0;
+      min-height: 5.6vh;
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: .15rem;
+      align-items: center;
+      justify-content: space-between;
+      padding: .4rem 2rem calc(.4rem + var(--safe-b)) 2rem;
+      background: var(--bg);
+      border-top: 1px solid rgba(46, 74, 42, .42);
+      font-family: var(--mono);
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--sub);
+      z-index: 40;
+      transition: background .25s, color .25s, border-color .25s;
+    }
+
+    .footer-bar .title-mini {
+      font-weight: 700;
+      color: var(--fach);
+      white-space: nowrap;
+    }
+
+    .footer-bar .count {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .footer-bar .hint {
+      opacity: .7;
+      white-space: nowrap;
+    }
+
+    body.dark-slide .footer-bar {
+      background: var(--fach);
+      color: var(--accent-a);
+      border-color: var(--accent-a);
+    }
+
+    body.dark-slide .footer-bar .title-mini {
+      color: var(--accent-a);
+    }
+
+    body.dark-slide .navbtn {
+      background: var(--fach);
+      color: var(--accent-a);
+      border-color: var(--accent-a);
+    }
+
+    body.accent-slide .footer-bar {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--fach-deep);
+    }
+
+    body.accent-slide .footer-bar .title-mini {
+      color: var(--fach-deep);
+    }
+
+    body.accent-slide .navbtn {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+      border-color: var(--fach-deep);
+    }
+
+    /* nav buttons */
+    .navbtn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--fach);
+      background: var(--bg);
+      color: var(--fach);
+      font-size: 1.3rem;
+      cursor: pointer;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
+    }
+
+    .navbtn:hover {
+      background: var(--fach);
+      color: var(--accent-a);
+    }
+
+    #prev-btn {
+      left: calc(22px + var(--safe-l));
+    }
+
+    #next-btn {
+      right: calc(22px + var(--safe-r));
+    }
+
+    /* notes drawer */
+    #notes-drawer {
+      position: fixed;
+      left: 7px;
+      right: 0;
+      bottom: 0;
+      height: 0;
+      overflow: hidden;
+      background: var(--fach);
+      color: var(--bg);
+      z-index: 70;
+      transition: height .3s ease;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: var(--safe-b);
+    }
+
+    #notes-drawer.open {
+      height: 26vh;
+    }
+
+    #notes-drawer .nd-head {
+      padding: .6rem 1.5rem 0 1.5rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--accent-a);
+      font-weight: 500;
+    }
+
+    #notes-drawer .nd-body {
+      padding: .4rem 1.5rem 1rem 1.5rem;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      overflow-y: auto;
+    }
+
+    /* overview grid */
+    #overview {
+      position: fixed;
+      inset: 0;
+      background: var(--fach);
+      z-index: 80;
+      display: none;
+      padding: 4vh 4vw;
+      overflow-y: auto;
+    }
+
+    #overview.open {
+      display: block;
+    }
+
+    #overview h2 {
+      color: var(--accent-a);
+      margin: 0 0 1.4rem 0;
+      font-family: var(--serif);
+      font-weight: 500;
+    }
+
+    #overview .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: .9rem;
+    }
+
+    #overview .ov-item {
+      background: transparent;
+      border: 2px solid var(--accent-a);
+      border-radius: 6px;
+      padding: .8rem 1rem;
+      cursor: pointer;
+      color: var(--bg);
+    }
+
+    #overview .ov-item:hover {
+      background: var(--accent-a);
+      color: var(--fach-deep);
+    }
+
+    #overview .ov-item .n {
+      color: var(--accent-a);
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: .7rem;
+    }
+
+    #overview .ov-item .t {
+      font-size: .92rem;
+      margin-top: .2rem;
+      line-height: 1.3;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--fach);
+      border-radius: 0;
+    }
+
+    @media (max-width:1099px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .timeline {
+        grid-template-columns: 1fr;
+        gap: .9rem;
+      }
+
+      .stations,
+      .stations.cols-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width:980px) {
+      .compare {
+        grid-template-columns: 1fr;
+        gap: .9rem;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .praxis {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        margin-top: .4rem;
+      }
+    }
+
+    @media (max-width:900px) {
+      .cards.cols-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width:640px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .karff {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width:900px) {
+      .cover {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        text-align: left;
+        overflow: hidden;
+      }
+
+      .cover .content {
+        display: contents;
+      }
+
+      .cover .kicker {
+        order: 0;
+      }
+
+      .cover h1.title {
+        order: 1;
+        max-width: none;
+      }
+
+      .cover .subtitle {
+        order: 2;
+        max-width: none;
+      }
+
+      .cover .meta {
+        order: 4;
+        margin-top: 1rem;
+      }
+
+      .steps {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .steps .arrow {
+        display: none;
+      }
+
+      .model-split .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-bar .hint {
+        display: none;
+      }
+    }
+
+    @media (max-height:650px) and (min-width:901px) {
+      .slide {
+        padding-top: 18px;
+        padding-bottom: 58px;
+      }
+
+      .cover h1.title {
+        font-size: clamp(1.9rem, 1rem + 3vw, 3rem);
+      }
+
+      .cover .subtitle {
+        margin-bottom: .8rem;
+      }
+
+      .cover .meta {
+        margin-top: .5rem;
+        padding-top: .65rem;
+      }
+
+      .card {
+        padding: .75rem 1rem;
+      }
+
+      .box {
+        padding: .7rem .9rem;
+      }
+    }
+
+    @media (max-width:560px) {
+      .model-split .steps {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ---------- modern Canva-inspired visual system ---------- */
+    html,
+    body {
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    }
+
+    .slide {
+      background:
+        radial-gradient(circle at 96% 5%, rgba(139, 92, 246, .12), transparent 24%),
+        radial-gradient(circle at 8% 96%, rgba(23, 184, 151, .08), transparent 22%),
+        var(--bg);
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      right: 4vw;
+      top: -105px;
+      border: 28px solid rgba(255, 111, 97, .16);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .slide>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    .kicker {
+      display: inline-flex;
+      width: max-content;
+      align-items: center;
+      padding: .42rem .72rem;
+      border: 1px solid rgba(139, 92, 246, .2);
+      border-radius: 999px;
+      background: #eee9ff;
+      color: #6842dc;
+      font-family: "Inter", sans-serif;
+      font-size: clamp(.64rem, .58rem + .24vw, .75rem);
+      font-weight: 700;
+      letter-spacing: .09em;
+    }
+
+    h1.title {
+      font-family: "General Sans", "Avenir Next", Arial, sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.9rem, 1.08rem + 2.7vw, 3.35rem);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+      color: var(--fach);
+      margin-bottom: .8rem;
+    }
+
+    .subtitle {
+      font-family: "Inter", sans-serif;
+      color: var(--sub);
+    }
+
+    .lead {
+      font-family: "Inter", sans-serif;
+      line-height: 1.48;
+    }
+
+    .cover {
+      background:
+        radial-gradient(circle at 14% 18%, rgba(139, 92, 246, .42), transparent 28%),
+        linear-gradient(135deg, #17182f 0%, #232341 58%, #141526 100%);
+    }
+
+    .cover::before {
+      width: 230px;
+      height: 230px;
+      top: auto;
+      right: auto;
+      left: -100px;
+      bottom: -120px;
+      border-color: rgba(23, 184, 151, .34);
+    }
+
+    .cover .kicker {
+      color: #e4dcff;
+      background: rgba(255, 255, 255, .1);
+      border-color: rgba(255, 255, 255, .22);
+    }
+
+    .cover h1.title {
+      color: #fff;
+      font-size: clamp(2.7rem, 1.25rem + 4.5vw, 5.2rem);
+      line-height: .94;
+      max-width: 10ch;
+    }
+
+    .cover .subtitle {
+      color: #e9e8f4;
+    }
+
+    .cover .meta {
+      color: #d8d5ea;
+      border-color: rgba(255, 255, 255, .28);
+      font-family: "Inter", sans-serif;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    .card,
+    .option,
+    .step,
+    .kletter,
+    .station,
+    .prompt-box {
+      background: rgba(255, 255, 255, .92);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(43, 35, 83, .08);
+    }
+
+    .cards>.card:nth-child(3n+1),
+    .station:nth-child(3n+1),
+    .step:nth-of-type(1),
+    .kletter:nth-child(2),
+    .kletter:nth-child(5) {
+      background: #292a4a;
+      color: #fff;
+      border-color: #292a4a;
+    }
+
+    .cards>.card:nth-child(3n+1) h2,
+    .station:nth-child(3n+1) h3,
+    .station:nth-child(3n+1) .snum,
+    .kletter:nth-child(2) .big,
+    .kletter:nth-child(5) .big {
+      color: #c8b8ff;
+    }
+
+    .cards>.card:nth-child(3n+1) p,
+    .station:nth-child(3n+1) p {
+      color: #eeeefa;
+    }
+
+    .cards>.card:nth-child(3n+2),
+    .station:nth-child(3n+2),
+    .kletter:nth-child(3) {
+      background: #fff0ed;
+      color: var(--fach);
+      border-color: #ffd4ce;
+    }
+
+    .cards>.card:nth-child(3n+2) h2,
+    .cards>.card:nth-child(3n+2) p {
+      color: var(--fach);
+    }
+
+    .card h2 {
+      font-family: "General Sans", sans-serif;
+      font-weight: 800;
+      color: var(--fach);
+    }
+
+    .option {
+      text-align: center;
+    }
+
+    .option:nth-child(1) {
+      background: #292a4a;
+      color: #fff;
+    }
+
+    .option:nth-child(2) {
+      background: #eee9ff;
+      color: var(--fach);
+      border-color: #dcd2ff;
+    }
+
+    .option:nth-child(1) .name,
+    .option:nth-child(1) .quote {
+      color: #e8e1ff;
+    }
+
+    .option .name {
+      color: #6842dc;
+      font-family: "General Sans", sans-serif;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 1.05rem;
+    }
+
+    .num-list li {
+      border-bottom: 1px solid #dcd8eb;
+      padding: .75rem .1rem;
+    }
+
+    .num-list .n {
+      border: 0;
+      background: #eee9ff;
+      color: #6842dc;
+      font-family: "General Sans", sans-serif;
+      font-weight: 800;
+    }
+
+    .compare .col {
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(43, 35, 83, .08);
+    }
+
+    .compare .strong {
+      background: #292a4a;
+      border: 0;
+      color: #fff;
+    }
+
+    .compare .strong h3 {
+      color: #c8b8ff;
+    }
+
+    .compare .weak {
+      background: #fff0ed;
+      border: 1px solid #ffd4ce;
+      color: var(--fach);
+    }
+
+    .compare .weak h3 {
+      color: #d74f44;
+    }
+
+    .box {
+      border: 0;
+      border-radius: 14px;
+      padding: .85rem 1rem;
+    }
+
+    .box-merk {
+      background: #e9f8f4;
+      border-left: 4px solid var(--accent-c);
+    }
+
+    .box-warn {
+      background: var(--warn-bg);
+      border-left: 4px solid var(--warn-border);
+    }
+
+    .box-danger {
+      background: var(--danger-bg);
+      border-left: 4px solid var(--danger-border);
+      color: var(--fach);
+    }
+
+    .side-panel {
+      border: 0;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #6c4ff8, #8b5cf6);
+      box-shadow: 0 14px 34px rgba(108, 79, 248, .22);
+    }
+
+    .side-panel .ab {
+      color: #fff;
+      font-family: "General Sans", sans-serif;
+      font-weight: 800;
+    }
+
+    .timeline h3 {
+      font-family: "Inter", sans-serif;
+      color: #6842dc;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .t-item {
+      border-color: #dedbea;
+    }
+
+    .t-item .time {
+      color: #6842dc;
+      font-family: "Inter", sans-serif;
+      font-weight: 800;
+    }
+
+    .prompt-box {
+      background: #fff;
+    }
+
+    .an-rolle,
+    .an-format {
+      background: #ffe8e4;
+    }
+
+    .an-kontext,
+    .an-fein {
+      background: #e9f8f4;
+    }
+
+    .an-aufgabe {
+      background: #eee9ff;
+      color: var(--fach);
+      border-color: #8b5cf6;
+    }
+
+    .slide-pink {
+      background: linear-gradient(145deg, #f1edff 0%, #fff6f4 100%);
+      color: var(--fach);
+    }
+
+    .slide-pink h1.title,
+    .slide-pink .kicker {
+      color: var(--fach);
+    }
+
+    .slide-summary,
+    .closing {
+      background: linear-gradient(135deg, #191a31 0%, #292a4a 65%, #17182c 100%);
+    }
+
+    .slide-summary::before,
+    .closing::before {
+      border-color: rgba(139, 92, 246, .38);
+    }
+
+    .slide-summary h1.title,
+    .closing h1.title {
+      color: #fff;
+    }
+
+    .slide-summary .kicker,
+    .closing .kicker {
+      color: #ded4ff;
+      background: rgba(255, 255, 255, .1);
+      border-color: rgba(255, 255, 255, .2);
+    }
+
+    .slide-summary .num-list li {
+      border-color: rgba(255, 255, 255, .18);
+    }
+
+    .slide-summary .num-list .n {
+      background: #8b5cf6;
+      color: #fff;
+    }
+
+    #progress-track {
+      width: 7px;
+      background: linear-gradient(180deg, #8b5cf6 0%, #ff6f61 52%, #17b897 100%);
+    }
+
+    #progress-mask {
+      width: 7px;
+      background: #302f48;
+    }
+
+    #progress-dot {
+      background: #fff;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, .18);
+    }
+
+    .footer-bar {
+      background: rgba(247, 246, 252, .88);
+      border-color: rgba(32, 33, 58, .1);
+      font-family: "Inter", sans-serif;
+      font-weight: 700;
+      letter-spacing: .05em;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    body.dark-slide .footer-bar {
+      background: rgba(24, 25, 48, .9);
+      color: #dcd5f4;
+      border-color: rgba(255, 255, 255, .12);
+    }
+
+    body.dark-slide .footer-bar .title-mini {
+      color: #fff;
+    }
+
+    body.accent-slide .footer-bar {
+      background: rgba(244, 240, 255, .9);
+      color: var(--fach);
+      border-color: rgba(32, 33, 58, .1);
+    }
+
+    body.accent-slide .footer-bar .title-mini {
+      color: var(--fach);
+    }
+
+    .navbtn {
+      border: 0;
+      background: rgba(255, 255, 255, .9);
+      color: #6842dc;
+      box-shadow: 0 8px 24px rgba(43, 35, 83, .14);
+      backdrop-filter: blur(10px);
+    }
+
+    .navbtn:hover {
+      background: #6c4ff8;
+      color: #fff;
+    }
+
+    body.dark-slide .navbtn {
+      background: rgba(255, 255, 255, .14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .18);
+    }
+
+    body.accent-slide .navbtn {
+      background: rgba(255, 255, 255, .9);
+      color: #6842dc;
+      border: 0;
+    }
+
+    #notes-drawer {
+      background: #20213a;
+      color: #f4f2ff;
+    }
+
+    #notes-drawer .nd-head {
+      color: #c8b8ff;
+      font-family: "Inter", sans-serif;
+      font-weight: 800;
+    }
+
+    #overview {
+      background: #18192e;
+    }
+
+    #overview h2 {
+      color: #fff;
+      font-family: "General Sans", sans-serif;
+      font-weight: 800;
+    }
+
+    #overview .ov-item {
+      background: #252642;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 16px;
+      color: #fff;
+    }
+
+    #overview .ov-item:hover {
+      background: #6c4ff8;
+      color: #fff;
+      border-color: #8b5cf6;
+    }
+
+    #overview .ov-item .n {
+      color: #c8b8ff;
+      font-family: "Inter", sans-serif;
+      font-weight: 700;
+    }
+
+    /* ---------- scrollytelling transitions ---------- */
+    #deck {
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .story-media {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .story-layer {
+      position: absolute;
+      inset: 0 0 0 auto;
+      width: 58%;
+      height: 100%;
+      opacity: 0;
+      transform: translateX(7%) scale(1.08);
+      transform-origin: center;
+      transition: opacity .72s ease, transform 1.05s cubic-bezier(.2, .72, .2, 1);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .72) 19%, #000 38%);
+      mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .72) 19%, #000 38%);
+    }
+
+    .story-layer img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .story-layer.active {
+      opacity: .76;
+      transform: translateX(0) scale(1.025);
+    }
+
+    .story-layer.enter-prev {
+      transform: translateX(-7%) scale(1.08);
+    }
+
+    .story-layer.exit-next {
+      opacity: 0;
+      transform: translateX(-8%) scale(1.045);
+    }
+
+    .story-layer.exit-prev {
+      opacity: 0;
+      transform: translateX(8%) scale(1.045);
+    }
+
+    .story-layer.active.drift-alt {
+      transform: translateX(-1.8%) scale(1.075);
+    }
+
+    .story-media.ambient .story-layer.active {
+      opacity: .42;
+      filter: saturate(.86);
+    }
+
+    .story-media.feature .story-layer.active {
+      opacity: .78;
+    }
+
+    .story-caption {
+      position: absolute;
+      right: clamp(2rem, 5vw, 5rem);
+      bottom: calc(7vh + var(--safe-b));
+      z-index: 4;
+      max-width: 34ch;
+      padding: .5rem .75rem;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(26, 27, 52, .62);
+      border: 1px solid rgba(255, 255, 255, .28);
+      font: 700 .68rem/1.2 "Inter", sans-serif;
+      letter-spacing: .04em;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: opacity .35s ease;
+    }
+
+    .story-media.ambient .story-caption {
+      opacity: 0;
+    }
+
+    .story-ki-badge {
+      position: absolute;
+      right: clamp(2rem, 5vw, 5rem);
+      top: calc(6vh + var(--safe-t, 0px));
+      z-index: 4;
+      padding: .32rem .65rem;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(26, 27, 52, .55);
+      border: 1px solid rgba(255, 255, 255, .24);
+      font: 600 .6rem/1.2 "Inter", sans-serif;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: opacity .35s ease;
+    }
+
+    .story-media.ambient .story-ki-badge {
+      opacity: 0;
+    }
+
+    @media (max-width:760px) {
+      .story-ki-badge {
+        display: none;
+      }
+    }
+
+    .slide {
+      z-index: 2;
+      background: transparent;
+      transition: opacity .5s ease, transform .68s cubic-bezier(.2, .72, .2, 1);
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(247, 246, 252, .99) 0%, rgba(247, 246, 252, .96) 48%, rgba(247, 246, 252, .72) 67%, transparent 86%);
+    }
+
+    .slide>* {
+      z-index: 2;
+    }
+
+    .slide.enter-next {
+      visibility: visible;
+      opacity: 0;
+      transform: translateX(7vw);
+    }
+
+    .slide.enter-prev {
+      visibility: visible;
+      opacity: 0;
+      transform: translateX(-7vw);
+    }
+
+    .slide.exit-next {
+      visibility: visible;
+      opacity: 0;
+      transform: translateX(-5vw);
+    }
+
+    .slide.exit-prev {
+      visibility: visible;
+      opacity: 0;
+      transform: translateX(5vw);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .slide.active .kicker {
+      animation: story-rise .52s both .08s;
+    }
+
+    .slide.active h1.title {
+      animation: story-rise .58s both .14s;
+    }
+
+    .slide.active .content {
+      animation: story-rise .64s both .21s;
+    }
+
+    @keyframes story-rise {
+      from {
+        opacity: 0;
+        transform: translateY(22px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide.story-feature::after {
+      background: linear-gradient(90deg, rgba(247, 246, 252, .99) 0%, rgba(247, 246, 252, .96) 48%, rgba(247, 246, 252, .36) 65%, transparent 79%);
+    }
+
+    .slide.story-ambient::after {
+      background: linear-gradient(90deg, rgba(247, 246, 252, .98) 0%, rgba(247, 246, 252, .94) 51%, rgba(247, 246, 252, .7) 70%, rgba(247, 246, 252, .22) 100%);
+    }
+
+    .slide-pink.story-ambient::after {
+      background: linear-gradient(90deg, rgba(244, 240, 255, .98) 0%, rgba(244, 240, 255, .94) 51%, rgba(244, 240, 255, .7) 70%, rgba(244, 240, 255, .24) 100%);
+    }
+
+    .slide.cover::after,
+    .slide.closing::after,
+    .slide.slide-summary::after {
+      background: linear-gradient(90deg, rgba(20, 21, 42, .98) 0%, rgba(20, 21, 42, .9) 45%, rgba(20, 21, 42, .2) 76%, transparent 100%);
+    }
+
+    @media (max-width:980px) {
+      .story-layer {
+        width: 100%;
+        opacity: 0;
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+
+      .story-media.feature .story-layer.active {
+        opacity: .22;
+      }
+
+      .story-media.ambient .story-layer.active {
+        opacity: .12;
+      }
+
+      .story-caption {
+        display: none;
+      }
+
+      .slide::after,
+      .slide.story-feature::after,
+      .slide.story-ambient::after {
+        background: rgba(247, 246, 252, .88);
+      }
+
+      .slide-pink.story-ambient::after {
+        background: rgba(244, 240, 255, .9);
+      }
+
+      .slide.cover::after,
+      .slide.closing::after,
+      .slide.slide-summary::after {
+        background: rgba(20, 21, 42, .82);
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+
+      .slide,
+      .story-layer {
+        transition: none !important;
+      }
+
+      .slide.active .kicker,
+      .slide.active h1.title,
+      .slide.active .content {
+        animation: none !important;
+      }
+    }
+
+    /* ---------- readability, note anchors, wider progress rail ---------- */
+    #progress-track,
+    #progress-mask {
+      width: 12px;
+    }
+
+    #progress-dot {
+      left: -4px;
+      width: 20px;
+      height: 20px;
+    }
+
+    #deck {
+      padding-left: 12px;
+    }
+
+    .slide {
+      left: 12px;
+    }
+
+    .footer-bar,
+    #notes-drawer {
+      left: 12px;
+    }
+
+    .step:nth-of-type(5) {
+      background: #6c4ff8;
+      color: #fff;
+      border-color: #6c4ff8;
+    }
+
+    .step:nth-of-type(5) .num,
+    .step:nth-of-type(5) .txt {
+      color: #fff;
+    }
+
+    .step:nth-of-type(1) .txt {
+      color: #f5f3ff;
+    }
+
+    .kletter:nth-child(2) .desc,
+    .kletter:nth-child(5) .desc {
+      color: #ece9f8;
+    }
+
+    .station:nth-child(3n+1) h3 {
+      color: #e3dbff;
+    }
+
+    .station:nth-child(3n+1) p {
+      color: #f2f0fa;
+    }
+
+    .compare .strong .result {
+      color: #e7e4f4;
+    }
+
+    .side-panel .zeit,
+    .side-panel .tip {
+      color: #fff;
+    }
+
+    .slide-summary .lead,
+    .slide-summary p,
+    .closing .lead {
+      color: #f3f1fb;
+    }
+
+    .slide-summary .num-list .t {
+      color: #f7f6fc;
+    }
+
+    .slide-pink .subtitle,
+    .slide-pink .lead {
+      color: #4f5068;
+    }
+
+    /* ---------- final contrast pass ---------- */
+    .cover::after {
+      background: linear-gradient(90deg, #121326 0%, #121326 54%, rgba(18, 19, 38, .94) 70%, rgba(18, 19, 38, .58) 88%, rgba(18, 19, 38, .34) 100%);
+    }
+
+    .cover h1.title {
+      color: #fff;
+      max-width: 11ch;
+      padding: .18em .26em .23em;
+      margin-left: -.26em;
+      border-radius: 22px;
+      background: rgba(11, 12, 29, .78);
+      box-shadow: 0 14px 36px rgba(5, 6, 18, .28);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, .38);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .cover .kicker {
+      color: #f0ecff;
+      background: rgba(17, 18, 40, .78);
+      border-color: rgba(255, 255, 255, .3);
+    }
+
+    .cover .subtitle {
+      color: #f4f2fb;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
+    }
+
+    .cover .meta {
+      color: #e5e2ef;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
+    }
+
+    .compare .weak h3 {
+      color: #9a3029;
+    }
+
+    .box-warn b {
+      color: #704100;
+    }
+
+    .box-danger b {
+      color: #8d2b25;
+    }
+
+    table.deck-table th {
+      color: #f5f2ff;
+    }
+
+    .side-panel {
+      background: linear-gradient(145deg, #5b3bd1, #7047e8);
+    }
+
+    .slide-summary .num-list .n {
+      background: #6842dc;
+    }
+
+    .step:nth-of-type(1) .num {
+      color: #ded4ff;
+    }
+
+    .cards>.card:nth-child(3n+1) h2,
+    .compare .strong h3 {
+      color: #ded4ff;
+    }
+
+    .story-caption {
+      background: rgba(18, 19, 39, .86);
+      color: #fff;
+    }
+
+    .footer-bar {
+      color: #4f5068;
+    }
+
+    body.dark-slide .footer-bar {
+      color: #eeeaf8;
+    }
+
+    #overview .ov-item .n {
+      color: #ded4ff;
+    }
+
+    @media (max-width:900px) {
+      .cover::after {
+        background: rgba(16, 17, 35, .9);
+      }
+
+      .cover h1.title {
+        background: rgba(11, 12, 29, .88);
+      }
+    }
+
+    /* ---------- clean dark cover title ---------- */
+    .slide.cover::after {
+      background: linear-gradient(90deg, rgba(247, 246, 252, .99) 0%, rgba(247, 246, 252, .97) 54%, rgba(247, 246, 252, .84) 68%, rgba(247, 246, 252, .38) 84%, transparent 100%);
+    }
+
+    .cover h1.title {
+      color: #20213a;
+      background: transparent;
+      padding: 0;
+      margin-left: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    .cover .kicker {
+      color: #5830c6;
+      background: #eee9ff;
+      border-color: #d8ceff;
+    }
+
+    .cover .subtitle {
+      color: #35364f;
+      text-shadow: none;
+    }
+
+    .cover .meta {
+      color: #4f5068;
+      border-color: rgba(32, 33, 58, .24);
+      text-shadow: none;
+    }
+
+    @media (max-width:900px) {
+      .slide.cover::after {
+        background: rgba(247, 246, 252, .92);
+      }
+    }
+
+    /* ---------- accessibility fix: info-hierarchy contrast on themed slides ---------- */
+    /* .cover has a light background (see "clean dark cover title" pass above) but the
+     base .cover{color:var(--bg)} rule still hands out light text to any element that
+     isn't explicitly covered — .info-secondary/.info-tertiary need dark text here. */
+    .cover .info-secondary,
+    .cover .info-tertiary,
+    .cover .info-label {
+      color: #35364f;
+      text-shadow: none;
+    }
+
+    .cover .info-tertiary .info-label {
+      color: #6a6b85;
+    }
+
+    /* .closing/.slide-summary keep a dark background — make sure info-secondary/tertiary
+     stay light regardless of specificity/inline-style edge cases. */
+    .closing .info-secondary,
+    .closing .info-tertiary,
+    .slide-summary .info-secondary,
+    .slide-summary .info-tertiary {
+      color: #f3f1fb;
+    }
+
+    .closing .info-label,
+    .slide-summary .info-label {
+      color: #ded4ff;
+    }
+
+    /* ---------- Folie 4 "Was macht ein Sprachmodell eigentlich?": größere Blocktexte ---------- */
+    #slide-3 .step .txt {
+      font-size: 1.18rem;
+      line-height: 1.32;
+    }
+
+    #slide-3 .step .num {
+      font-size: .86rem;
+    }
+
+    #slide-3 .box {
+      font-size: 1.18rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="progress-track"></div>
+  <div id="progress-mask"></div>
+  <div id="progress-dot"></div>
+
+  <div id="deck">
+    <div class="story-media feature" id="story-media" aria-hidden="true">
+      <div class="story-layer active"><img alt=""><span class="story-caption"></span></div>
+      <div class="story-layer"><img alt=""><span class="story-caption"></span></div>
+      <span class="story-ki-badge">KI-generiertes Bild</span>
+    </div>
+  </div>
+
+  <button class="navbtn" id="prev-btn" title="Zurück (Pfeil links)">‹</button>
+  <button class="navbtn" id="next-btn" title="Weiter (Pfeil rechts / Leertaste)">›</button>
+
+  <div class="footer-bar">
+    <span class="title-mini" id="title-mini"
+      title="Erstellungshinweis: Mit Unterstützung generativer KI erstellt; fachlich und didaktisch geprüft und überarbeitet.">KI
+      im Schulalltag</span>
+    <span class="hint">N = Notizen · O = Übersicht · F = Vollbild</span>
+    <span class="count"><span id="cur-num">1</span> / <span id="total-num">43</span></span>
+  </div>
+
+  <div id="notes-drawer">
+    <div class="nd-head">Notizen für die Moderation</div>
+    <div class="nd-body" id="notes-body"></div>
+  </div>
+
+  <div id="overview">
+    <h2>Übersicht – Folie anklicken zum Springen</h2>
+    <div class="grid" id="overview-grid"></div>
+  </div>
+
+  <script>
+    const SLIDES = [
+      {
+        kicker: "GANZTAGESFORTBILDUNG · 8 STUNDEN · KLASSEN 1–12",
+        title: "Künstliche Intelligenz im Schulalltag",
+        cls: "cover",
+        body: `
+    <p class="subtitle info-primary">Verstehen · Prompten · Unterricht entlasten · Fair differenzieren</p>
+    <div class="meta">[Name] · [Datum] · [Ort]</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Verstehen · Prompten · Prüfen · Entlasten · Transfer</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Ganztagesfortbildung · Klassen 1–12 · KI unterstützt – der Mensch verantwortet</p>
+  `,
+        notes: "Begrüßung. Kurz die eigene Rolle vorstellen. Versprechen des Tages: mindestens 60 % Praxis, jede/r geht mit fertigen Produkten (Prompts, Sprint-Ergebnis aus dem Praxislabor, differenzierte LEK, Gesprächsleitfaden) nach Hause."
+      },
+      {
+        kicker: "Herzlich willkommen",
+        title: "Unser Tag im Überblick",
+        body: `
+    <div class="timeline">
+      <div>
+        <h3>Vormittag</h3>
+        <div class="t-item"><span class="time">09:00</span><span class="what">Ankommen, Ziele, Blitzlicht</span></div>
+        <div class="t-item"><span class="time">09:15</span><span class="what">Modul 1 · KI verstehen + Cognitive Offloading/Deskilling</span></div>
+        <div class="t-item"><span class="time">09:30</span><span class="what">Modul 2 · Datenschutz &amp; EU AI Act</span></div>
+        <div class="t-item"><span class="time">10:20</span><span class="what">Modul 3 · Prompting-Werkstatt (KARFF, Praxis)</span></div>
+        <div class="t-item"><span class="time">11:15</span><span class="what">Modul 4 · Praxislabor „Unterricht planen“ (Jigsaw, Praxis)</span></div>
+      </div>
+      <div>
+        <h3>Nachmittag</h3>
+        <div class="t-item"><span class="time">12:45</span><span class="what">Modul 5 · Praxislabor „Kommunizieren“ + Lernentwicklungsgespräche (Jigsaw, Praxis)</span></div>
+        <div class="t-item"><span class="time">13:30</span><span class="what">Modul 6 · Differenzierte LEK: LRS &amp; Förderbedarf</span></div>
+        <div class="t-item"><span class="time">14:20</span><span class="what">Modul 7 · Tools und quellenbasiertes Arbeiten (Praxis)</span></div>
+        <div class="t-item"><span class="time">14:40</span><span class="what">Modul 8 · Prüfungskultur &amp; Transfer</span></div>
+        <div class="t-item"><span class="time">15:00</span><span class="what">Ende</span></div>
+      </div>
+      <div class="timeline-note">Pausen: 10:00–10:20 Uhr · Mittag: 12:00–12:45 Uhr · 14:00–14:20 Uhr · Module 4 und 5 dauern etwas länger als die anderen Module.</div>
+    </div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Didaktischer Tagesbogen</span>
+      <p class="slider-flow">Verstehen → rechtlich einordnen → selbst prompten → anwenden → prüfen → transferieren</p>
+    </div>
+    <div class="info-tertiary info-block">
+      <span class="info-label">Drei Tagesergebnisse</span>
+      <p class="info-tags"><span>1 guter Prompt</span><span>1 geprüftes Unterrichtsprodukt</span><span>1 konkreter Transferplan</span></p>
+    </div>
+  `,
+        notes: "Tagesstruktur vorstellen. Betonen: Vormittag legt das Fundament (Verstehen, Recht, Prompten) und mündet in Modul 4, dem ersten Praxislabor-Jigsaw. Nachmittag startet mit Modul 5, dem zweiten Praxislabor-Jigsaw plus Lernentwicklungsgespräche, dann Anwendungswerkstatt: Differenzierung, Tools, Prüfungskultur."
+      },
+      {
+        kicker: "Einstieg · 15 Minuten",
+        title: "Wo steht ihr? Ein Blitzlicht",
+        body: `
+    <div class="options">
+      <div class="option"><div class="name">Neuling</div><div class="quote">„Ich habe KI noch nie oder kaum genutzt.“</div></div>
+      <div class="option"><div class="name">Ausprobierer/in</div><div class="quote">„Ich habe schon experimentiert – mal mit, mal ohne Erfolg.“</div></div>
+      <div class="option"><div class="name">Routinier</div><div class="quote">„KI gehört bei mir schon zur Vorbereitung dazu.“</div></div>
+    </div>
+    <div class="box box-merk"><b>Aufstellung im Raum:</b> Ordnet euch einer Gruppe zu. Danach: Erwartung an den Tag auf eine Moderationskarte – ein Satz genügt!</div>
+    <p class="info-secondary" style="margin-top:.7rem;">Es gibt heute keinen richtigen Startpunkt – wichtig ist der nächste sinnvolle Schritt.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Beobachtet am Ende: Hat sich eure Selbsteinschätzung verändert?</p>
+  `,
+        notes: "Aufstellung schafft Bewegung und macht Heterogenität sichtbar. Routiniers später gezielt als Tisch-Experten einsetzen. Erwartungskarten an Pinnwand sammeln, am Tagesende abgleichen."
+      },
+      {
+        kicker: "Modul 1 · KI verstehen",
+        title: "Was macht ein Sprachmodell eigentlich?",
+        body: `
+    <div class="model-split">
+        <p class="lead">Es berechnet das wahrscheinlich nächste Wort – Milliarden Mal trainiert an Texten.</p>
+        <div class="steps">
+          <div class="step"><div class="num">1</div><div class="txt">Euer Prompt</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">2</div><div class="txt">Zerlegung in Wortbausteine</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">3</div><div class="txt">Wahrscheinlichkeitsrechnung</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="num">4</div><div class="txt">Wort für Wort: Antwort</div></div>
+        </div>
+        <div class="box box-merk"><b>Die wichtigste Folgerung:</b> Das Modell „weiß“ nichts und „versteht“ nichts – es formuliert plausibel. Deshalb klingt auch Falsches überzeugend. Fachliche Prüfung bleibt immer unsere Aufgabe.</div>
+        <p class="info-secondary" style="margin-top:.6rem;">Optimiert auf plausible Fortsetzung – nicht auf Wahrheit.</p>
+        <p class="info-tags info-tertiary" style="margin-top:.4rem;"><span>sprachlich sicher ≠ fachlich sicher</span><span>Antwort ≠ Quelle</span><span>Plausibilität braucht Prüfung</span></p>
+    </div>
+  `,
+        notes: "Einfaches Erklärmodell: Autovervollständigung auf Steroiden. Analogie für alle Schulstufen nutzbar. Nicht zu technisch werden – das Ziel ist ein realistisches mentales Modell, kein Informatikkurs."
+      },
+      {
+        kicker: "Modul 1 · KI verstehen",
+        title: "Von der Suchmaschine zur generativen KI",
+        body: `
+    <div class="info-primary">
+      <div class="compare">
+        <div class="col">
+          <h3>Suchmaschine</h3>
+          <p class="slider-flow">Suchbegriffe → Treffer auswählen → Quellen vergleichen → Informationen selbst zusammenführen</p>
+        </div>
+        <div class="col strong">
+          <h3>Generative KI</h3>
+          <p class="slider-flow">Auftrag formulieren → Entwurf erhalten → Ergebnis prüfen → nachsteuern / iterieren</p>
+        </div>
+      </div>
+      <div class="box box-merk"><b>Die KI spart nicht nur Klicks – sie übernimmt auch Auswahl, Struktur und Formulierung.</b></div>
+    </div>
+
+    <div class="info-secondary info-block">
+      <span class="info-label">Im Vergleich</span>
+      <table class="info-matrix">
+        <thead><tr><th>Suchmaschine</th><th>Generative KI</th></tr></thead>
+        <tbody>
+          <tr><td>liefert Fundstellen</td><td>liefert einen formulierten Entwurf</td></tr>
+          <tr><td>Quellen sind Ausgangspunkt</td><td>Ergebnis steht zunächst im Vordergrund</td></tr>
+          <tr><td>Zusammenführung liegt beim Menschen</td><td>Zusammenführung wird teilweise ausgelagert</td></tr>
+          <tr><td>Suchkompetenz zentral</td><td>Auftrags- und Prüfkompetenz zentral</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-tertiary info-block">
+      <span class="info-label">Typische Lehreraufgaben, bei denen sich der Workflow verändert</span>
+      <p class="info-tags"><span>Arbeitsblatt</span><span>Stundenplanung</span><span>Stoffverteilungsplan</span><span>Elternnachricht</span><span>Differenzierung</span><span>Recherche</span><span>Feedback-Entwürfe</span><span>Ideen-Sparring</span></p>
+      <p style="margin-top:.5rem;">Effizienzgewinn bedeutet gleichzeitig mehr Cognitive Offloading – deshalb wird Prüfen zur Kernkompetenz.</p>
+    </div>
+  `,
+        notes: "Hauptaussage (info-primary) bleibt dauerhaft und ohne Rotation sichtbar: zwei klar getrennte Arbeitsabläufe plus der Merksatz. Die Vergleichsmatrix (info-secondary) und die Workflow-Liste mit Cognitive-Offloading-Satz (info-tertiary) sind auf dem Desktop ebenfalls dauerhaft sichtbar, nur kleiner/blasser – kein Auto-Slider, nichts wechselt automatisch. Auf dem Smartphone werden Matrix und Randinfo ausgeblendet; dort zeigt die Folie nur Titel, die zwei Kern-Workflows und den Merksatz. Nicht suggerieren, dass die Suchmaschine „schlecht” und die KI „gut” sei – reiner Workflow-Kontrast. Überleitung: Genau dieser neue Workflow – KI nutzen, aber prüfen – ist das Thema der nächsten Folien (Grenzen, dann Cognitive Offloading/Deskilling/Skill-Skipping) und der Plausibilitäts-Übung danach. Keine Prompting-Methode hier erklären, das folgt bewusst erst in Modul 3."
+      },
+      {
+        kicker: "Modul 1 · KI verstehen",
+        title: "Die Grenzen – und warum sie uns betreffen",
+        body: `
+    <div class="cards cols-2">
+      <div class="card"><h2>Halluzinationen</h2><p>KI erfindet Fakten, Quellen und Paragrafen – flüssig und überzeugend formuliert.</p></div>
+      <div class="card"><h2>Bias &amp; Stereotype</h2><p>Trainingsdaten enthalten Verzerrungen; Beispiele und Bilder können Klischees reproduzieren.</p></div>
+      <div class="card"><h2>Datenschutz</h2><p>Eingaben können beim Anbieter landen – Schülerdaten sind tabu (Modul 2).</p></div>
+      <div class="card"><h2>Keine Pädagogik</h2><p>KI kennt weder das einzelne Kind noch eure Klasse. Beziehung, Diagnose, Bewertung: Mensch!</p></div>
+    </div>
+    <div class="box box-warn"><b>Faustregel:</b> KI liefert Entwürfe, keine Wahrheiten. Vier-Augen-Prinzip: KI schreibt – Lehrkraft prüft.</div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Prüffrage je Grenze</span>
+      <p class="info-tags"><span>Quelle belegbar?</span><span>Stereotyp oder Verzerrung?</span><span>Darf diese Information ins System?</span><span>Wer trägt die pädagogische Entscheidung?</span></p>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">KI liefert Entwürfe, keine Wahrheiten.</p>
+  `,
+        notes: "Hier ehrlich sein – Vertrauen entsteht durch realistische Erwartungen. Beispiel einer Halluzination aus dem Schulkontext zeigen (z. B. erfundener Lehrplanbezug oder erfundene Quelle). Überleitung: Eine Grenze betrifft nicht die KI, sondern unser eigenes Gehirn – die nächsten drei Folien."
+      },
+      {
+        kicker: "Modul 1 · KI und unser Denken",
+        title: "Wenn Denken auswandert: drei Begriffe",
+        body: `
+    <div>
+        <div class="cards stacked">
+          <div class="card"><h2>Cognitive Offloading</h2><p>Denkarbeit an externe Hilfen auslagern: Notizzettel, Navi, Taschenrechner – und jetzt KI. Entlastet das Gehirn, kann aber Lernen verhindern, wenn es VOR dem eigenen Können passiert.</p></div>
+          <div class="card"><h2>Deskilling</h2><p>Eine vorhandene Fähigkeit verkümmert, weil sie nicht mehr genutzt wird – wie bei Piloten am Autopiloten. Betrifft auch Lehrkräfte: eigenes Formulieren, Korrekturgespür, Kopfrechnen.</p></div>
+          <div class="card"><h2>Skill-Skipping</h2><p>Eine Fähigkeit wird nie erst aufgebaut, weil KI den Lernschritt überspringt. Hauptrisiko für Schüler/innen: Schreibprozess, Recherche, Problemlösen.</p></div>
+        </div>
+        <div class="box box-merk"><b>Merkhilfe:</b> Deskilling = verlernen, was man konnte. Skill-Skipping = nie lernen, was man bräuchte.</div>
+        <div class="info-secondary info-block">
+          <span class="info-label">Schulbeispiel je Begriff</span>
+          <p class="info-tags"><span>Offloading: KI strukturiert meine Notizen</span><span>Deskilling: Ich korrigiere kaum noch selbst</span><span>Skill-Skipping: Schüler/in lässt die erste Gliederung immer erzeugen</span></p>
+        </div>
+        <p class="info-tertiary" style="margin-top:.4rem;">Offloading ist nicht automatisch schlecht. Entscheidend ist, welche Fähigkeit ausgelagert wird und wann.</p>
+    </div>
+  `,
+        notes: "Alltagsbeispiele abfragen: Wer kennt noch Telefonnummern auswendig? Wer findet ohne Navi in die Nachbarstadt? Offloading ist nicht per se schlecht – Schreiben selbst ist ausgelagertes Gedächtnis. Kritisch wird es, wenn die Grundfertigkeit fehlt oder gerade aufgebaut werden soll. Der Unterschied Deskilling (Lehrkräfte-Risiko) vs. Skill-Skipping (Schüler-Risiko) strukturiert die nächsten Folien. Vertiefung: AB 1 (Deskilling-Selbstcheck) und Schüler-Arbeitsblatt „Denkst du noch selbst?“ (kein AB-Nummer-Badge, Begleitmaterial)."
+      },
+      {
+        kicker: "Modul 1 · KI und unser Denken",
+        title: "Was die Forschung andeutet",
+        body: `
+    <div class="cards cols-2">
+      <div class="card"><h2>MIT: „Your Brain on ChatGPT“ (2025)</h2><p>EEG-Studie: Wer Essays mit LLM-Hilfe schrieb, zeigte geringere Vernetzung der Hirnaktivität, erinnerte den eigenen Text schlechter und empfand weniger „Ownership“.</p></div>
+      <div class="card"><h2>Befragungsstudien (2025)</h2><p>Je stärker das Vertrauen in KI, desto weniger eigenes kritisches Denken wird investiert – vermittelt über Cognitive Offloading, besonders ausgeprägt bei Jüngeren.</p></div>
+      <div class="card"><h2>Aber: Werkzeuge entlasten auch</h2><p>Entscheidend ist WANN und WIE: KI nach dem eigenen Denken (Feedback, Varianten) stärkt – KI statt des eigenen Denkens schwächt.</p></div>
+      <div class="card"><h2>Junge Studienlage</h2><p>Viele Querschnitts- und Laborbefunde, wenig Langzeitdaten – ernst nehmen, nicht dramatisieren.</p></div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Hinweise, keine endgültigen Langzeitbeweise.</p>
+    <div class="info-tertiary info-block">
+      <span class="info-label">Methodenleiste</span>
+      <p class="info-tags"><span>EEG</span><span>Laborstudien</span><span>Querschnitt</span><span>junge Datenlage</span></p>
+      <p style="margin-top:.4rem;">Didaktische Konsequenz: KI nach eigenem Denken ist etwas anderes als KI statt eigenem Denken.</p>
+    </div>
+  `,
+        notes: "Quellen für Nachfragen: Kosmyna et al. 2025 (MIT Media Lab, „Your Brain on ChatGPT“, Preprint, n=54); Gerlich 2025 (Societies, Zusammenhang KI-Nutzung/kritisches Denken über Cognitive Offloading); Lee et al. 2025 (Microsoft Research/CMU, Befragung Wissensarbeiter: mehr KI-Vertrauen = weniger investiertes kritisches Denken). Einordnung wichtig: Korrelationen, kleine Stichproben, keine Kausalketten über Jahre. Botschaft: Es gibt echte Hinweise, dass unreflektiertes Offloading Lernen kostet – Design der Nutzung entscheidet."
+      },
+      {
+        kicker: "Modul 1 · KI und unser Denken",
+        title: "Konsequenzen – für die Klasse und für uns",
+        body: `
+    <div class="compare">
+      <div class="col pair">
+        <h3>Gegen Skill-Skipping (Schüler/innen)</h3>
+        <ul>
+          <li>Erst denken, dann prompten: eigener Entwurf vor der KI.</li>
+          <li>Tutor-Prompts statt Antwort-Prompts: „Gib Hinweise, verrate nicht die Lösung.“</li>
+          <li>Prozess sichtbar machen: Entwürfe, Prompts und Reflexion mit abgeben.</li>
+          <li>Bewusst KI-freie Phasen für Grundfertigkeiten.</li>
+        </ul>
+      </div>
+      <div class="col pair">
+        <h3>Gegen Deskilling (Lehrkräfte)</h3>
+        <ul>
+          <li>Kernkompetenzen im Training halten: regelmäßig selbst formulieren und korrigieren – KI als Zweitmeinung.</li>
+          <li>Automation Bias vermeiden: KI-Ergebnisse aktiv prüfen statt durchwinken.</li>
+          <li>Offloading bewusst wählen: Routinen ja – pädagogisches Urteil nein.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Leitprinzip: Erst Eigenleistung → dann KI → dann Prüfung</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Nicht jede Routine muss im Kopf bleiben. Kernkompetenzen und pädagogisches Urteil schon.</p>
+  `,
+        notes: "Brücke: Genau diese Strategien tauchen im Material wieder auf – AB 1 (Deskilling-Selbstcheck für Lehrkräfte), Schüler-Arbeitsblatt „Denkst du noch selbst?“ (Sek I, direkt einsetzbar) und die Tutor-Prompt-Vorlage in der Vorlagensammlung. Diskussionsimpuls: Welche Fähigkeit dürfen unsere SuS auf keinen Fall überspringen?"
+      },
+      {
+        kicker: "Modul 1 · KI und unser Denken",
+        title: "Sieht richtig aus. Ist es richtig?",
+        body: `
+    <div class="infografik-panel">
+      <svg viewBox="0 0 860 300" role="img" aria-label="KI-generierte Erklärgrafik: Warum gibt es Jahreszeiten? Die Grafik zeigt eine Erdumlaufbahn um die Sonne und behauptet, Sommer entstehe durch Nähe zur Sonne und Winter durch größere Entfernung.">
+        <rect x="0" y="0" width="860" height="300" rx="14" fill="#eef3ff"/>
+        <text x="430" y="38" text-anchor="middle" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="24" fill="#20213a">Warum gibt es Jahreszeiten? ☀️❄️</text>
+        <text x="430" y="60" text-anchor="middle" font-family="DM Sans,Arial,sans-serif" font-size="13" fill="#66677d">Kindgerecht erklärt für die 4. Klasse</text>
+
+        <g>
+          <circle cx="135" cy="172" r="46" fill="#ffb347" stroke="#e0781f" stroke-width="2"/>
+          <g stroke="#ffb347" stroke-width="4" stroke-linecap="round">
+            <line x1="135" y1="100" x2="135" y2="82"/>
+            <line x1="135" y1="244" x2="135" y2="262"/>
+            <line x1="63" y1="172" x2="45" y2="172"/>
+            <line x1="207" y1="172" x2="225" y2="172"/>
+            <line x1="84" y1="121" x2="70" y2="107"/>
+            <line x1="186" y1="121" x2="200" y2="107"/>
+            <line x1="84" y1="223" x2="70" y2="237"/>
+            <line x1="186" y1="223" x2="200" y2="237"/>
+          </g>
+          <circle cx="120" cy="165" r="5.5" fill="#20213a"/>
+          <circle cx="150" cy="165" r="5.5" fill="#20213a"/>
+          <path d="M 116 187 Q 135 202 154 187" stroke="#20213a" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <text x="135" y="232" text-anchor="middle" font-family="Manrope,Arial,sans-serif" font-weight="700" font-size="14" fill="#20213a">Sonne</text>
+        </g>
+
+        <ellipse cx="510" cy="178" rx="265" ry="80" fill="none" stroke="#b8b8d1" stroke-width="2.5" stroke-dasharray="7 6"/>
+
+        <g>
+          <circle cx="245" cy="178" r="18" fill="#4fa8ff" stroke="#2c6fc7" stroke-width="2"/>
+          <path d="M 236 171 q 7 -7 14 -1 q 3 5 -3 9 q -9 3 -11 -8 Z" fill="#17b897"/>
+          <text x="245" y="128" text-anchor="middle" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="15" fill="#c2410c">☀️ Sommer</text>
+          <text x="245" y="216" text-anchor="middle" font-family="DM Sans,Arial,sans-serif" font-size="12.5" fill="#20213a">näher an der Sonne</text>
+          <text x="245" y="231" text-anchor="middle" font-family="DM Sans,Arial,sans-serif" font-size="12.5" fill="#20213a">→ wärmer</text>
+        </g>
+
+        <g>
+          <circle cx="775" cy="178" r="18" fill="#4fa8ff" stroke="#2c6fc7" stroke-width="2"/>
+          <path d="M 766 171 q 7 -7 14 -1 q 3 5 -3 9 q -9 3 -11 -8 Z" fill="#17b897"/>
+          <text x="775" y="128" text-anchor="middle" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="15" fill="#2c6fc7">❄️ Winter</text>
+          <text x="775" y="216" text-anchor="middle" font-family="DM Sans,Arial,sans-serif" font-size="12.5" fill="#20213a">weiter von der Sonne entfernt</text>
+          <text x="775" y="231" text-anchor="middle" font-family="DM Sans,Arial,sans-serif" font-size="12.5" fill="#20213a">→ kälter</text>
+        </g>
+
+        <text x="430" y="288" text-anchor="middle" font-family="DM Sans,Arial,sans-serif" font-style="italic" font-size="12" fill="#66677d">automatisch erzeugte Erklärgrafik</text>
+      </svg>
+      <div class="infografik-caption">KI-generierte Erklärgrafik – „Warum gibt es Jahreszeiten?“ (Sek I)</div>
+    </div>
+    <p class="info-primary" style="display:none;" data-mobile-hint>Findet den Fehler.</p>
+
+    <div class="info-secondary info-block">
+      <span class="info-label">Plenumsfragen</span>
+      <ul style="font-size:1.05rem; line-height:1.7; margin:0; padding-left:1.2em;">
+        <li>Was wirkt auf den ersten Blick überzeugend?</li>
+        <li>Wo steckt der Fehler?</li>
+        <li>Wie würdet ihr ihn zuverlässig prüfen?</li>
+      </ul>
+    </div>
+
+    <div class="info-tertiary info-block">
+      <span class="info-label">Meta-Frage</span>
+      <p>Was passiert, wenn mein eigenes Fachwissen zum Prüfen langsam weniger genutzt wird?</p>
+      <p class="info-tags" style="margin-top:.4rem;"><span>Plausibilität ≠ Richtigkeit</span><span>Automation Bias</span><span>Deskilling</span><span>Skill-Skipping</span></p>
+    </div>
+
+    <div class="reveal-accordion">
+      <button class="reveal-trigger" type="button" aria-expanded="false" aria-controls="reveal-jahreszeiten">Auflösung anzeigen</button>
+      <div class="reveal-panel" id="reveal-jahreszeiten" hidden>
+        <div class="box box-warn"><b>Der Fehler:</b> Jahreszeiten entstehen durch die Neigung der Erdachse, nicht durch die Entfernung zur Sonne – im Nordsommer ist die Erde sogar etwas weiter von der Sonne entfernt als im Winter.</div>
+        <div class="cards" style="margin-top:.6rem;">
+          <div class="card"><h2>Cognitive Offloading</h2><p>KI übernimmt Suche, Auswahl, Struktur und Darstellung.</p></div>
+          <div class="card"><h2>Deskilling</h2><p>Dauerhaft ausgelagerte Prüfung kann das eigene fachliche Prüfgespür schwächen.</p></div>
+          <div class="card"><h2>Skill-Skipping</h2><p>Ohne bereits aufgebaute Fachkompetenz wird ein plausibler Fehler möglicherweise gar nicht erkannt.</p></div>
+        </div>
+        <div class="box box-danger"><b>Zentrale Botschaft:</b> Das Risiko ist nicht nur, dass KI Fehler macht. Das Risiko ist, dass ihre Ergebnisse so plausibel wirken, dass wir aufhören zu prüfen.</div>
+      </div>
+    </div>
+  `,
+        notes: "Genau EIN Artefakt groß zeigen, keine zweite Version daneben. Wichtig: Den Fehler in der Grafik nicht vorab markieren oder verraten – die Teilnehmenden sollen ihn zunächst selbst entdecken. Nach ca. 20–30 Sekunden Beobachtungszeit oder sobald die Ideen im Raum erschöpft sind: Auflösung per Klick einblenden (Button „Auflösung anzeigen“). Fachlicher Fehler zur eigenen Orientierung: Jahreszeiten entstehen durch die Neigung der Erdachse, nicht durch die Entfernung zur Sonne – im Nordsommer ist die Erde sogar etwas weiter von der Sonne entfernt als im Winter. Verbindung zu Deskilling/Automation Bias herstellen: Je routinierter wir KI-Ergebnisse übernehmen, desto wichtiger wird bewusstes Prüfen. Keine Prompting-Methode hier erklären, das folgt bewusst erst in Modul 3. Diese Folie ist keine Live-Demo und kein Prompting-Training – reiner Plenums-Prüfimpuls."
+      },
+      {
+        kicker: "Modul 1 · Praxisphase",
+        title: "Werkstatt: Euer Deskilling-Selbstcheck",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Bearbeitet zu zweit den Deskilling-Selbstcheck auf AB 1: Wo lagert ihr selbst schon Denkarbeit aus?</li>
+          <li>Diskutiert: Welche Routineaufgabe kostet euch jede Woche am meisten Zeit – und würdet ihr sie an KI abgeben?</li>
+          <li>Gegenprobe: Welche Aufgabe wollt ihr bewusst NICHT abgeben?</li>
+          <li>Optional: Werft einen Blick ins Schüler-Arbeitsblatt „Denkst du noch selbst?“ – Begleitmaterial ohne eigene AB-Nummer, einsetzbar ab Sek I.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 1</div>
+        <div class="zeit">Zeit: 15 Minuten</div>
+        <div class="tip">Die gesammelten Aufgaben aus Frage 2 nutzt ihr in Modul 3 (Prompting) direkt weiter.</div>
+      </div>
+    </div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Gut auslagerbar</span>
+      <p class="info-tags"><span>Varianten</span><span>Struktur</span><span>Formulierungsentwurf</span><span>Zusammenfassung</span></p>
+    </div>
+    <div class="info-tertiary info-block">
+      <span class="info-label">Bewusst beim Menschen</span>
+      <p class="info-tags"><span>Beziehung</span><span>Bewertung</span><span>Diagnose</span><span>Verantwortung</span></p>
+    </div>
+  `,
+        notes: "Die gesammelten Aufgaben werden in Modul 3 (Prompting) direkt weiterverwendet – ankündigen! Frage 3 greift die Offloading-Folien auf: bewusste Entscheidung, was beim Menschen bleibt. Das Schüler-Arbeitsblatt „Denkst du noch selbst?“ trägt bewusst keine AB-Nummer – es ist Begleitmaterial für den Unterricht, kein Fortbildungs-Arbeitsblatt."
+      },
+      {
+        kicker: "Modul 2 · Recht &amp; Datenschutz",
+        title: "Zwei Leitplanken: DSGVO und EU AI Act",
+        body: `
+    <div class="compare">
+      <div class="col strong">
+        <h3>DSGVO</h3>
+        <ul>
+          <li>Personenbezogene Schülerdaten (Namen, Noten, Diagnosen, Fotos) nur in ausdrücklich schulisch freigegebene KI-Systeme.</li>
+          <li>„Kind A, Klasse 3“ ist Pseudonymisierung, keine echte Anonymisierung – die DSGVO gilt weiter.</li>
+          <li>Serverstandort ist ein Prüfpunkt von mehreren: schulische Freigabe, Rechtsgrundlage, Datenminimierung, Auftragsverarbeitung (Art. 28 DSGVO), ggf. Drittlandtransfer.</li>
+        </ul>
+      </div>
+      <div class="col strong">
+        <h3>EU AI Act</h3>
+        <ul>
+          <li>Seit 02.02.2025: KI-Kompetenz-Pflicht (Art. 4) und Verbote (Art. 5) in Kraft.</li>
+          <li>Seit 02.08.2026: allgemeine Anwendbarkeit, Transparenzpflichten (Art. 50).</li>
+          <li>Ab 02.12.2027 (nach aktueller Rechtslage): Hochrisiko-Einstufung nach Anhang III trifft auch bestimmte Bildungsanwendungen.</li>
+          <li>KI-Unterstützung bei der Bewertung ist nicht pauschal verboten, aber Hochrisiko-eingestuft: menschliche Letztentscheidung und Sorgfaltspflichten bleiben Pflicht.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="box box-danger"><b>Verbindliche Arbeitsregel:</b> Keine realen Schülerfalldaten in nicht ausdrücklich schulisch freigegebene KI-Systeme. Bei offenen Systemen ausschließlich fiktive oder tatsächlich anonymisierte Fälle.</div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Zwei Fragen, zwei Gesetze</span>
+      <p>Datenschutz fragt: Welche Daten dürfen verarbeitet werden?</p>
+      <p>AI Act fragt u. a.: Welche KI-Anwendung liegt vor und welche Pflichten gelten?</p>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Rechtslage + schulische Freigabe + konkrete Nutzung müssen zusammen betrachtet werden.</p>
+  `,
+        notes: "Kein Jura-Seminar – Kernbotschaften reichen: 1) Keine realen Schülerfalldaten in nicht freigegebene Systeme. 2) „Kind A, Klasse 3“ ist Pseudonymisierung (Identifizierung z. B. durch Klassenlehrkraft, Mitschüler/innen oder Eltern bleibt oft möglich, DSGVO gilt weiter) – echte Anonymisierung bedeutet, dass niemand mehr identifizierbar ist, auch nicht mit Zusatzwissen. 3) Serverstandort ist EIN Kriterium unter mehreren, kein automatisches Verbot – entscheidend sind schulische Freigabe, Rechtsgrundlage, Datenminimierung, Auftragsverarbeitung nach Art. 28 DSGVO und ggf. Drittlandtransfer. 4) EU AI Act Stand 10.08.2026: allgemeine Anwendbarkeit seit 02.08.2026, AI-Literacy-Pflichten (Art. 4) und viele Verbote (Art. 5) bereits seit 02.02.2025, Transparenzpflichten (Art. 50) seit 02.08.2026, Hochrisiko-Einstufung nach Anhang III ab 02.12.2027. KI-basierte Emotionserkennung in Bildungseinrichtungen ist grundsätzlich verboten (enge medizinische/Sicherheits-Ausnahmen). Bewertungshoheit bleibt beim Menschen. Hinweis auf landesspezifische Erlasse und den/die schulische/n Datenschutzbeauftragte/n."
+      },
+      {
+        kicker: "Modul 2 · Recht &amp; Datenschutz",
+        title: "Die KI-Ampel Schule",
+        body: `
+    <p class="lead">Eine schnelle Einordnungshilfe für den Alltag: In welche Kategorie fällt eure geplante KI-Nutzung?</p>
+    <div class="ampel-grid">
+      <div class="ampel-tile rot"><span class="glyph">⛔</span><div class="label">Rot · Verboten</div><p>z. B. KI-basierte Emotionserkennung an Schüler/innen, biometrische Echtzeit-Überwachung – EU AI Act Art. 5.</p></div>
+      <div class="ampel-tile gelb"><span class="glyph">⚠</span><div class="label">Gelb · Hochrisiko-sensibel</div><p>z. B. KI-gestützte Bewertung/Notenvorschläge – erlaubt, aber an menschliche Letztentscheidung und Sorgfaltspflichten gebunden.</p></div>
+      <div class="ampel-tile blau"><span class="glyph">ℹ</span><div class="label">Blau · Transparenzpflicht</div><p>z. B. KI-generierte Texte/Bilder für Schüler/innen – Kennzeichnungspflicht nach Art. 50 EU AI Act.</p></div>
+      <div class="ampel-tile gruen"><span class="glyph">✅</span><div class="label">Grün · Normale Assistenz</div><p>z. B. Ideen-Sparring, Entwürfe, Strukturierung durch die Lehrkraft – unkritisch bei fiktiven/anonymisierten Daten.</p></div>
+    </div>
+    <div class="box box-merk"><b>Merkregel:</b> Im Zweifel eine Farbe strenger einordnen und nachfragen statt raten. Die Ampel steht als Einordnungshilfe auch auf AB 2.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Vier Farben, eine Frage: Wer entscheidet hier – und auf welcher Rechtsgrundlage?</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Die Ampel ersetzt keine Einzelfallprüfung durch Schulleitung/Datenschutzbeauftragte/n – sie ist eine erste Einordnungshilfe.</p>
+  `,
+        notes: "Jede Farbe kurz mit einem Schulbeispiel erläutern. Rot = harte EU-AI-Act-Verbote (u. a. Emotionserkennung an Lernenden). Gelb = Hochrisiko-Anwendungen wie Bewertungsunterstützung, die erlaubt, aber streng an menschliche Kontrolle gebunden sind. Blau = Transparenz-/Kennzeichnungspflicht nach Art. 50, etwa wenn Schüler/innen KI-generierte Inhalte erhalten. Grün = normale Assistenztätigkeiten ohne besondere Auflagen. Überleitung zu AB 2, wo Fallbeispiele den vier Farben zugeordnet werden."
+      },
+      {
+        kicker: "Modul 2 · Recht &amp; Datenschutz",
+        title: "KI-Angebote in Mecklenburg-Vorpommern",
+        body: `
+    <div class="cards cols-2">
+      <div class="card"><h2>Landeslizenz fobizz</h2><p>Lehrkräfte in M-V können die Fortbildungen kostenfrei nutzen. Auch die fobizz-Tools einschließlich der KI-Assistenzen stehen im Rahmen der Lehrkräftefortbildung zur Verfügung; die Anmeldung erfolgt über das IQ M-V.</p></div>
+      <div class="card"><h2>Handlungsleitfaden des Landes</h2><p>„Gemeinsam die Welt der generativen KI-Systeme erkunden“ gibt Orientierung für einen pädagogisch sinnvollen und verantwortbaren Einsatz. Die schulische Datenschutzverantwortung bleibt bei der Schulleitung.</p></div>
+      <div class="card"><h2>Fortbildung und Beratung</h2><p>IQ M-V und Medienpädagogisches Zentrum unterstützen Schulen mit Workshops, Informationsangeboten und der landesweiten Videofortbildung „Masterclass KI – Künstliche Intelligenz im Klassenzimmer“.</p></div>
+      <div class="card"><h2>Pilotprojekt FelloFish</h2><p>Das KI-gestützte Feedbackwerkzeug wird an ausgewählten öffentlichen allgemeinbildenden Schulen erprobt. Es ist ein Pilotprojekt und kein flächendeckender Landeszugang.</p></div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Verfügbarkeit und Freigabe können sich ändern – vor Einsatz prüfen.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Ansprechstellen: Schule · Datenschutz · IQ M-V / zuständige Landesangebote</p>
+  `,
+        notes: "Stand 2026: Mecklenburg-Vorpommern stellt Lehrkräften eine landesweite fobizz-Lizenz bereit. Zugang und Informationen laufen über das IQ M-V. Ergänzend auf den offiziellen Handlungsleitfaden und die Masterclass KI verweisen. FelloFish klar als Pilotprojekt an ausgewählten Schulen einordnen – nicht als landesweit verfügbares Werkzeug."
+      },
+      {
+        kicker: "Modul 2 · Gemeinsames Fazit",
+        title: "Unsere 5 goldenen KI-Regeln",
+        body: `
+    <ol class="num-list" style="list-style:none;">
+        <li><span class="n">1</span><span class="t">Keine personenbezogenen Schülerdaten in nicht freigegebene KI-Systeme – „Kind A“ ist Pseudonymisierung, keine Anonymisierung.</span></li>
+        <li><span class="n">2</span><span class="t">KI-Ergebnisse sind Entwürfe: prüfen, anpassen, verantworten.</span></li>
+        <li><span class="n">3</span><span class="t">Schulgeeignete, datenschutzkonforme Zugänge nutzen – Freigabe, Rechtsgrundlage und AVV statt Bauchgefühl.</span></li>
+        <li><span class="n">4</span><span class="t">Transparenz: offen damit umgehen, wo KI mitgearbeitet hat.</span></li>
+        <li><span class="n">5</span><span class="t">Pädagogische Entscheidungen (Noten, Diagnosen, Gespräche) trifft der Mensch.</span></li>
+      </ol>
+    <p class="info-secondary" style="margin-top:.6rem;">Zusatzformel: Daten prüfen → Ergebnis prüfen → Entscheidung beim Menschen</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Kennzeichnung: KI-Unterstützung transparent machen, besonders bei erzeugten Materialien und Medien.</p>
+  `,
+        notes: "Regeln gemeinsam durchsprechen, ggf. eine 6. Regel aus dem Plenum ergänzen (oft genannt: „Erst denken, dann prompten“ – passt zu Modul 1). Diese Folie steht auch auf AB 2 und im Vorlagen-Poster. Vorschlag: ausgedruckt ins Lehrerzimmer hängen."
+      },
+      {
+        kicker: "Modul 2 · Praxisphase",
+        title: "Werkstatt: KI-Ampel &amp; Datenschutz-Check",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Ordnet die Fallbeispiele auf AB 2 den vier Ampelfarben zu.</li>
+          <li>Diskutiert die strittigen Fälle zu zweit: Woran macht ihr die Einordnung fest?</li>
+          <li>Prüft eure eigene Tool-Praxis: Wo würdet ihr heute eher Gelb statt Grün ankreuzen?</li>
+          <li>Haltet eine Regel fest, die ihr ab morgen anders macht.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 2</div>
+        <div class="zeit">Zeit: 30 Minuten</div>
+        <div class="tip">Im Zweifel eine Farbe strenger einordnen, dann nachfragen.</div>
+      </div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Übertragt eure Einordnung anschließend auf ein reales Tool aus eurem eigenen Unterricht.</p>
+  `,
+        notes: "Während der Arbeitsphase herumgehen, strittige Fälle im Plenum kurz auflösen. Ziel: Die Ampel wird ein Alltagswerkzeug, kein einmaliges Gedankenspiel. Wer fertig ist: eigene Fallbeispiele aus dem Kollegium einordnen lassen."
+      },
+      {
+        kicker: "Modul 3 · Prompting-Werkstatt",
+        title: "Der Unterschied liegt im Prompt",
+        body: `
+    <div class="compare">
+      <div class="col weak">
+        <h3>Schwach</h3>
+        <div class="prompt">„Erstelle ein Arbeitsblatt zu Brüchen.“</div>
+        <div class="result">→ beliebig, falsches Niveau, ohne Lösungen, generisch</div>
+      </div>
+      <div class="col strong">
+        <h3>Stark</h3>
+        <div class="prompt">„Du bist Mathelehrkraft … Klasse 6 … Erweitern/Kürzen … 8 Aufgaben in 3 Niveaus mit Alltagsbezug … Lösungsteil separat … frage nach, wenn dir etwas fehlt.“</div>
+        <div class="result">→ passgenau, differenziert, direkt einsetzbar</div>
+      </div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Mehr Text ist nicht automatisch ein besserer Prompt.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Gut ist ein Prompt dann, wenn relevante Bedingungen explizit werden.</p>
+  `,
+        notes: "Beide Prompts live ausführen und Ergebnisse vergleichen – der Aha-Effekt trägt das ganze Modul. Überleitung: Damit das jedem gelingt, gibt es eine einfache Formel."
+      },
+      {
+        kicker: "Modul 3 · Prompting-Werkstatt",
+        title: "Die KARFF-Formel",
+        body: `
+    <div class="karff">
+      <div class="kletter"><div class="big">K</div><div class="word">Kontext</div><div class="desc">Klasse, Fach, Ausgangslage, Besonderheiten</div></div>
+      <div class="kletter"><div class="big">A</div><div class="word">Aufgabe</div><div class="desc">Klarer Arbeitsauftrag mit Operator („Erstelle…“, „Fasse zusammen…“)</div></div>
+      <div class="kletter"><div class="big">R</div><div class="word">Rolle</div><div class="desc">„Du bist eine erfahrene Grundschullehrkraft…“</div></div>
+      <div class="kletter"><div class="big">F</div><div class="word">Format</div><div class="desc">Tabelle? Niveaustufen? Wortanzahl? Lösungsteil?</div></div>
+      <div class="kletter"><div class="big">F</div><div class="word">Feinschliff</div><div class="desc">Nachfassen: kürzen, vereinfachen, variieren lassen</div></div>
+    </div>
+    <p class="info-tertiary" style="margin-top:.6rem;">KARFF ist eine Denkstütze, kein Pflichtschema.</p>
+  `,
+        notes: "Eselsbrücke anbieten: „Karff“ wie „scharf“ – scharfe Prompts, scharfe Ergebnisse. Hinweis: Es gibt viele ähnliche Formeln; entscheidend ist das Prinzip Kontext + Präzision + Iteration."
+      },
+      {
+        kicker: "Modul 3 · Prompting-Werkstatt",
+        title: "Ein KARFF-Prompt unter der Lupe",
+        body: `
+    <div class="prompt-box">
+      <span class="an-rolle">Du bist eine erfahrene Mathematiklehrkraft an einer Gesamtschule.</span>
+      <span class="an-kontext">Ich unterrichte eine 6. Klasse, die das Erweitern und Kürzen von Brüchen neu gelernt hat.</span>
+      <span class="an-aufgabe">Erstelle ein Arbeitsblatt mit 8 Aufgaben in drei Schwierigkeitsstufen, je mit Alltagsbezug.</span>
+      <span class="an-format">Format: nummerierte Aufgaben, Lösungsteil separat am Ende.</span>
+      <span class="an-fein">Frage mich, falls dir Informationen fehlen.</span>
+    </div>
+    <div class="legend">
+      <span><i></i>Rolle</span>
+      <span><i></i>Kontext</span>
+      <span><i></i>Aufgabe</span>
+      <span><i></i>Format</span>
+      <span><i></i>Feinschliff/Dialog</span>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Welche Information verändert die Ausgabe am stärksten?</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Quelle und Qualitätskriterien bei fachlich sensiblen Aufgaben zusätzlich explizit nennen.</p>
+  `,
+        notes: "Farbcodierung zeigt: Jeder Baustein hat eine Funktion. Der letzte Satz („Frage mich…“) ist ein Profi-Trick – die KI deckt selbst auf, welche Infos fehlen."
+      },
+      {
+        kicker: "Modul 3 · Praxisphase",
+        title: "Werkstatt: Eure Prompt-Schmiede",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li><b>Aufgabe 1 (einzeln):</b> Prompts auf AB 3 analysieren – KARFF-Bausteine markieren.</li>
+          <li><b>Aufgabe 2 (zu zweit):</b> den defekten Prompt reparieren.</li>
+          <li><b>Aufgabe 3 (zu zweit):</b> Eine echte Aufgabe aus eurer nächsten Woche als KARFF-Prompt bauen und im Tool testen.</li>
+          <li>Mindestens zwei Feinschliff-Nachfragen stellen.</li>
+          <li>Besten Prompt für die Galerie-Runde notieren.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 3</div>
+        <div class="zeit">Zeit: 45 Minuten</div>
+        <div class="tip">Tipp: Nutzt die Aufgabenideen aus der Murmelphase von Modul 1.</div>
+      </div>
+    </div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Workflow</span>
+      <p class="slider-flow">Prompt V1 → testen → Schwäche finden → Prompt V2</p>
+    </div>
+    <div class="info-tertiary info-block">
+      <span class="info-label">Showcase-Ziel</span>
+      <p class="info-tags"><span>1 Ergebnis</span><span>1 Schwäche</span><span>1 Verbesserung</span><span>1 menschliche Grenze</span></p>
+    </div>
+  `,
+        notes: "Während der Arbeitsphase herumgehen, Routiniers als Helfer aktivieren. Galerie-Runde: 3–4 Paare stellen ihren Prompt + Ergebnis vor (je 1 Min.). Typische Erkenntnis würdigen: Iteration schlägt Perfektion beim ersten Versuch."
+      },
+      {
+        kicker: "Modul 4 · Praxislabor",
+        title: "Praxislabor: Drei Sprints, eine Werkstatt",
+        body: `
+    <p class="lead">Der Raum teilt sich in die Fachschaftsgruppen. Zu jeder Gruppe gehört mindestens ein Ausprobierer, Neuling und Routinier. Jede Gruppe bearbeitet schrittweise die Arbeitsblätter. Nach jeder Bearbeitung erfolgt die Präsentation in 90 Sekunden.</p>
+    <div class="stations cols-3">
+      <div class="station"><span class="snum">A</span><div><h3>Stoffverteilungsplan</h3><p>Ein Halbjahr strukturiert planen – AB 4A</p></div></div>
+      <div class="station"><span class="snum">B</span><div><h3>Unterrichtsstundenplanung</h3><p>Eine einzelne Stunde durchplanen – AB 4B</p></div></div>
+      <div class="station"><span class="snum">E</span><div><h3>Arbeitsblätter mit KI erstellen</h3><p>Optional bei mehr als 2 Gruppen – AB 4E</p></div></div>
+    </div>
+    <div class="box box-merk"><b>Jigsaw-Prinzip:</b> Bildet 2 Gruppen (oder Vielfache von 2) für die Pflicht-Sprints A/B. Bei einer dritten Gruppe kommt Sprint E dazu. Jede Gruppe bearbeitet nur EINEN Sprint – die anderen lernt ihr im Showcase kennen.</div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Beide Fälle sind fiktiv, aber realistisch nah am Schulalltag.</p>
+  `,
+        notes: "Raumaufteilung vorher klären: zwei Tischinseln, je ein Arbeitsblatt-Satz pro Sprint. Gruppen können nach Fach/Schulstufe zugeteilt werden oder zufällig – wichtig ist nur, dass beide Sprints besetzt sind. Beide Fälle sind fiktiv, aber realistisch nah am Schulalltag. Die Sprints Elternnachricht (AB 4C) und Förderantrag (AB 4D) folgen als eigenes Praxislabor in Modul 5 (Kommunizieren und dokumentieren)."
+      },
+      {
+        kicker: "Modul 4 · Praxislabor",
+        title: "Der Sprint-Ablauf: von Fall bis Showcase",
+        body: `
+    <ol class="num-list" style="list-style:none;">
+      <li><span class="n">1</span><span class="t">Fall verstehen – die Ausgangslage auf eurem Arbeitsblatt lesen</span></li>
+      <li><span class="n">2</span><span class="t">Infos auswählen – was braucht der Prompt wirklich?</span></li>
+      <li><span class="n">3</span><span class="t">Prompt V1 schreiben – KARFF nutzen</span></li>
+      <li><span class="n">4</span><span class="t">Prompt V1 testen – im Tool ausführen</span></li>
+      <li><span class="n">5</span><span class="t">Schwächen markieren – was fehlt, was passt nicht?</span></li>
+      <li><span class="n">6</span><span class="t">Prompt V2 schreiben – gezielt nachschärfen</span></li>
+      <li><span class="n">7</span><span class="t">Erneut erzeugen – Ergebnis mit V1 vergleichen</span></li>
+      <li><span class="n">8</span><span class="t">90-Sekunden-Showcase vorbereiten – die Kernbotschaft in einem Satz</span></li>
+    </ol>
+    <div class="box box-merk"><b>Qualitätscheck für jeden Sprint:</b> Passt der Ton zur Zielgruppe? Sind alle nötigen Infos enthalten? Bleibt eine menschliche Prüfung/Freigabe vorgesehen? Ist nichts real Personenbezogenes enthalten?</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Zeitrichtwert: Schritte 1–3 ca. 10 Min. · 4–7 ca. 20 Min. · 8 ca. 5 Min.</p>
+  `,
+        notes: "Dieser Achtschritt-Ablauf gilt identisch für beide Sprints (A–B) – nur der Fall unterscheidet sich. Zeitrichtwert grob: Schritte 1–3 ca. 10 Min., 4–7 ca. 20 Min., 8 ca. 5 Min. Der Qualitätscheck ist der gemeinsame Prüfmaßstab, den alle Gruppen am Ende anlegen."
+      },
+      {
+        kicker: "Modul 4 · Praxisphase",
+        title: "Euer Auftrag im Praxislabor",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Findet euch in euren Fachschaftsgruppen zusammen.</li>
+          <li>Arbeitet die Schritte auf eurem Arbeitsblatt durch.</li>
+          <li>Bereitet euren 90-Sekunden-Showcase vor: Fall, bester Prompt, Ergebnis.</li>
+          <li>Achtet auf den Qualitätscheck – er gilt für alle Präsentationen gleich.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 4A–4B und 4E</div>
+        <div class="zeit">Zeit: ca. 20 Minuten/AB</div>
+        <div class="tip">Ihr bearbeitet nur EINEN Sprint – die anderen lernt ihr im Showcase kennen.</div>
+      </div>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Haltet am Ende fest, welche Kennzeichnung zu eurem Ergebnis passt.</p>
+  `,
+        notes: "Zwei Arbeitsblätter existieren parallel: AB 4A Stoffverteilungsplan, AB 4B Unterrichtsstundenplanung. Jede Gruppe erhält nur ihr eigenes Arbeitsblatt. Herumgehen, an jedem Tisch mindestens einmal vorbeischauen."
+      },
+      {
+        kicker: "Modul 4 · Praxisphase",
+        title: "90-Sekunden-Showcases",
+        body: `
+    <ol class="num-list" style="list-style:none;">
+      <li><span class="n">1</span><span class="t">90 Sekunden pro Gruppe – Timer sichtbar für alle</span></li>
+      <li><span class="n">2</span><span class="t">Zeigt: Ausgangslage, bester Prompt (V2), Ergebnis</span></li>
+      <li><span class="n">3</span><span class="t">Eine Lehre, die auch für andere Fächer oder Sprints gilt</span></li>
+      <li><span class="n">4</span><span class="t">Publikum notiert sich einen Mitschreib-Punkt pro Showcase</span></li>
+    </ol>
+    <div class="box box-merk"><b>Ziel:</b> Am Ende kennt jede/r beide Sprint-Ergebnisse – auch ohne sie selbst bearbeitet zu haben.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Timer sichtbar für alle – 90 Sekunden sind kurz und werden konsequent gehalten.</p>
+  `,
+        notes: "Timer konsequent einsetzen, freundlich, aber verbindlich unterbrechen. Reihenfolge A–B durchgehen. Nach jedem Showcase kurz Raum für eine Verständnisfrage lassen, keine Grundsatzdiskussion. Abschließend im Plenum: Welcher Sprint-Trick war für dich am überraschendsten?"
+      },
+      {
+        kicker: "Modul 5 · Praxislabor",
+        title: "Praxislabor: Zwei Sprints, eine Werkstatt",
+        body: `
+    <p class="lead">Weiter geht's mit Modul 5 – Kommunizieren und Dokumentieren. Die Gruppen bleiben, wieder ein Prompt-Sprint pro Gruppe.</p>
+    <div class="stations">
+      <div class="station"><span class="snum">C</span><div><h3>Elternnachricht</h3><p>Eine heikle Nachricht an Eltern formulieren – AB 4C</p></div></div>
+      <div class="station"><span class="snum">D</span><div><h3>Förderantrag</h3><p>Einen Förderantrag vorbereiten – AB 4D</p></div></div>
+    </div>
+    <div class="box box-merk"><b>Jigsaw-Prinzip:</b> Bildet 2 Gruppen (oder Vielfache von 2). Jede Gruppe bearbeitet nur EINEN Sprint – den anderen lernt ihr im Showcase kennen.</div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Beide Fälle sind fiktiv, aber realistisch nah am Schulalltag.</p>
+  `,
+        notes: "Gleicher Ablauf wie in Modul 4, neue Fälle: AB 4C Elternnachricht, AB 4D Förderantrag. Falls die Gruppeneinteilung aus Modul 4 beibehalten wird, Sprints tauschen (wer A/B hatte, macht jetzt C/D). Beide Fälle sind fiktiv."
+      },
+      {
+        kicker: "Modul 5 · Praxislabor",
+        title: "Der Sprint-Ablauf: von Fall bis Showcase",
+        body: `
+    <ol class="num-list" style="list-style:none;">
+      <li><span class="n">1</span><span class="t">Fall verstehen – die Ausgangslage auf eurem Arbeitsblatt lesen</span></li>
+      <li><span class="n">2</span><span class="t">Infos auswählen – was braucht der Prompt wirklich?</span></li>
+      <li><span class="n">3</span><span class="t">Prompt V1 schreiben – KARFF nutzen</span></li>
+      <li><span class="n">4</span><span class="t">Prompt V1 testen – im Tool ausführen</span></li>
+      <li><span class="n">5</span><span class="t">Schwächen markieren – was fehlt, was passt nicht?</span></li>
+      <li><span class="n">6</span><span class="t">Prompt V2 schreiben – gezielt nachschärfen</span></li>
+      <li><span class="n">7</span><span class="t">Erneut erzeugen – Ergebnis mit V1 vergleichen</span></li>
+      <li><span class="n">8</span><span class="t">90-Sekunden-Showcase vorbereiten – die Kernbotschaft in einem Satz</span></li>
+    </ol>
+    <div class="box box-merk"><b>Qualitätscheck für jeden Sprint:</b> Passt der Ton zur Zielgruppe? Sind alle nötigen Infos enthalten? Bleibt eine menschliche Prüfung/Freigabe vorgesehen? Ist nichts real Personenbezogenes enthalten?</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Zeitrichtwert: Schritte 1–3 ca. 10 Min. · 4–7 ca. 20 Min. · 8 ca. 5 Min.</p>
+  `,
+        notes: "Derselbe Achtschritt-Ablauf wie in Modul 4 – nur die Fälle unterscheiden sich (Elternnachricht/Förderantrag statt Stoffverteilung/Stunde). Zeitrichtwert grob: Schritte 1–3 ca. 10 Min., 4–7 ca. 20 Min., 8 ca. 5 Min."
+      },
+      {
+        kicker: "Modul 5 · Praxisphase",
+        title: "Euer Auftrag im Praxislabor",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Findet euch in eurer zugewiesenen Sprint-Gruppe zusammen (C oder D).</li>
+          <li>Arbeitet die 8 Schritte auf eurem Arbeitsblatt durch.</li>
+          <li>Bereitet euren 90-Sekunden-Showcase vor: Fall, bester Prompt, Ergebnis, eine Lehre.</li>
+          <li>Achtet auf den Qualitätscheck – er gilt für beide Sprints gleich.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 4C–4D</div>
+        <div class="zeit">Zeit: ca. 20 Minuten/AB</div>
+        <div class="tip">Ihr bearbeitet nur EINEN Sprint (C oder D) – den anderen lernt ihr im Showcase kennen.</div>
+      </div>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Haltet am Ende fest, welche Kennzeichnung zu eurem Ergebnis passt.</p>
+  `,
+        notes: "Zwei Arbeitsblätter existieren parallel: AB 4C Elternnachricht, AB 4D Förderantrag. Jede Gruppe erhält nur ihr eigenes Arbeitsblatt. Herumgehen, an jedem Tisch mindestens einmal vorbeischauen. Bei AB 4D besonders auf die harte Grenze achten: keine Diagnose, keine Förderentscheidung durch die KI."
+      },
+      {
+        kicker: "Modul 5 · Praxisphase",
+        title: "90-Sekunden-Showcases",
+        body: `
+    <ol class="num-list" style="list-style:none;">
+      <li><span class="n">1</span><span class="t">90 Sekunden pro Gruppe – Timer sichtbar für alle</span></li>
+      <li><span class="n">2</span><span class="t">Zeigt: Ausgangslage, bester Prompt (V2), Ergebnis</span></li>
+      <li><span class="n">3</span><span class="t">Eine Lehre, die auch für andere Fächer oder Sprints gilt</span></li>
+      <li><span class="n">4</span><span class="t">Publikum notiert sich einen Mitschreib-Punkt pro Showcase</span></li>
+    </ol>
+    <div class="box box-merk"><b>Ziel:</b> Am Ende kennt jede/r beide Sprint-Ergebnisse – auch ohne sie selbst bearbeitet zu haben.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Timer sichtbar für alle – 90 Sekunden sind kurz und werden konsequent gehalten.</p>
+  `,
+        notes: "Timer konsequent einsetzen, freundlich, aber verbindlich unterbrechen. Reihenfolge C–D durchgehen. Nach jedem Showcase kurz Raum für eine Verständnisfrage lassen, keine Grundsatzdiskussion."
+      },
+      {
+        kicker: "Modul 5 · Lernentwicklungsgespräche",
+        title: "KI als Vorbereitungs-Assistent – nie als Entscheider",
+        body: `
+    <div>
+        <div class="compare stacked">
+          <div class="col weak">
+            <h3>Das darf KI</h3>
+            <p>Beobachtungen strukturieren · Stärken/Entwicklungsfelder formulieren · kindgerechte Sprache · Zielvereinbarungen vorschlagen · mögliche Elternfragen antizipieren</p>
+          </div>
+          <div class="col strong">
+            <h3>Das bleibt bei euch</h3>
+            <p>Das Kind kennen · Beobachtungen gewichten · diagnostische Einschätzung · das Gespräch führen · Beziehung gestalten</p>
+          </div>
+        </div>
+        <div class="box box-danger"><b>Eiserne Regel:</b> Keine Klarnamen, Geburtsdaten, Diagnosen oder Familieninfos in die KI. Es heißt immer: „Kind A, Klasse 3“ – das ist Pseudonymisierung, keine echte Anonymisierung: Identifizierung bleibt oft möglich (Klassenlehrkraft, Mitschüler/innen, Eltern). Die DSGVO gilt weiter, deshalb bleibt es bei rein fiktiven oder wirklich anonymisierten Fällen.</div>
+        <p class="info-secondary" style="margin-top:.6rem;">KI kann Sprache und Struktur vorbereiten – sie kennt das Kind nicht.</p>
+        <p class="info-tertiary" style="margin-top:.3rem;">Fiktive bzw. tatsächlich anonymisierte Fälle; „Kind A“ ist nicht automatisch anonym.</p>
+    </div>
+  `,
+        notes: "Diese Folie entscheidet über die Akzeptanz des Moduls: KI nimmt Schreibarbeit ab, nicht Beziehungsarbeit. Anonymisierungs-Übung auf AB 7 als Pflicht-Warm-up ankündigen. Pseudonymisierung vs. Anonymisierung noch einmal knapp wiederholen – das ist derselbe Punkt wie in Modul 2."
+      },
+      {
+        kicker: "Modul 5 · Lernentwicklungsgespräche",
+        title: "Vom Stichpunkt zum Gesprächsleitfaden",
+        body: `
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div class="txt"><b>Beobachtungen sammeln</b><br>Stichpunkte aus Unterricht &amp; Heften – anonymisiert</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">2</div><div class="txt"><b>KARFF-Prompt</b><br>Rolle, Klasse, Beobachtungen, gewünschtes Leitfaden-Format</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">3</div><div class="txt"><b>Entwurf prüfen</b><br>Stimmt das Bild? Was fehlt, was ist zu glatt formuliert?</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">4</div><div class="txt"><b>Persönlich machen</b><br>Eigene Beispiele, eigene Sprache, realistische Ziele</div></div>
+    </div>
+    <div class="box box-merk"><b>Leitfaden-Format:</b> Einstieg · 3 Stärken · 2 Entwicklungsfelder · 2 SMARTe Zielvereinbarungen · mögliche Fragen · kindgerechter Abschluss</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Beobachtung ≠ Interpretation ≠ Diagnose</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Eigene Beispiele und eigene Sprache machen den Entwurf erst zum Gesprächsleitfaden.</p>
+  `,
+        notes: "Live-Demo mit dem fiktiven Fallbeispiel von AB 7 (Kind A, Klasse 3). Zeigen, wie Schritt 4 aus einem generischen Text einen persönlichen Leitfaden macht."
+      },
+      {
+        kicker: "Modul 5 · Praxisphase",
+        title: "Euer Gesprächsleitfaden",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Warm-up: Anonymisierungs-Training auf AB 7 (5 Min.).</li>
+          <li>Eigenen (anonymisierten!) Fall oder das Fallbeispiel „Kind A“ wählen.</li>
+          <li>Mit der Prompt-Vorlage einen Gesprächsleitfaden erzeugen.</li>
+          <li>Profi-Check im Tandem: Klingt das nach MIR? Sind die Ziele kindgerecht? Was weiß nur ich über das Kind?</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 7</div>
+        <div class="zeit">Zeit: 35 Minuten</div>
+        <div class="tip">Auch geeignet für: Elternsprechtag, Zeugnisgespräche, Förderplangespräche.</div>
+      </div>
+    </div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Tandem-Check</span>
+      <p class="info-tags"><span>Stimmt das Bild?</span><span>Ist es wertschätzend?</span><span>Sind Ziele realistisch?</span></p>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Was weiß nur die Lehrkraft – und darf die KI nicht ergänzen?</p>
+  `,
+        notes: "Beobachten, ob wirklich anonymisiert wird – ggf. freundlich intervenieren. In der Auswertung die Frage „Was weiß nur ich?“ groß machen: Diese Frage zeigt den unverzichtbaren menschlichen Anteil."
+      },
+      {
+        kicker: "Modul 6 · Faire Lernerfolgskontrollen",
+        title: "Drei Begriffe, die man trennen muss",
+        body: `
+    <div>
+        <div class="cards stacked">
+          <div class="card"><h2>Differenzierung</h2><p>Unterricht &amp; Aufgaben an unterschiedliche Lernstände anpassen – pädagogische Alltagsaufgabe für ALLE Kinder.</p></div>
+          <div class="card"><h2>Nachteilsausgleich</h2><p>z. B. bei LRS: Anforderungen bleiben GLEICH (zielgleich) – verändert werden die Bedingungen: Zeit, Layout, Hilfen. Die Leistung ist gleichwertig!</p></div>
+          <div class="card"><h2>Zieldifferente Förderung</h2><p>z. B. Förderschwerpunkt Lernen: Auch die Anforderungen dürfen angepasst werden – Basis ist der individuelle Förderplan.</p></div>
+        </div>
+        <div class="box box-warn">Rechtsgrundlagen sind Ländersache: Erlasse, APO und Dokumentationspflichten eures Bundeslandes beachten!</div>
+        <div class="info-secondary info-block">
+          <span class="info-label">Visuelle Achse</span>
+          <p class="slider-flow">Bedingungen anpassen ←→ Anforderungen anpassen</p>
+        </div>
+        <p class="info-tertiary" style="margin-top:.4rem;">Rechtsgrundlage und Förderplanung bestimmen den Rahmen – nicht die KI.</p>
+    </div>
+  `,
+        notes: "Zentrale Botschaft: Nachteilsausgleich ist KEINE Bevorzugung und KEINE Niveausenkung – die Leistung gilt als gleichwertig (KMK). Die Entscheidung über Nachteilsausgleiche trifft die Schule/Klassenkonferenz, nicht die KI."
+      },
+      {
+        kicker: "Modul 6 · Faire Lernerfolgskontrollen",
+        title: "Was KI bei LRS leisten kann (zielgleich!)",
+        body: `
+    <div class="cards cols-2">
+      <div class="card"><h2>Lesefreundliches Layout</h2><p>Größere serifenarme Schrift, Zeilenabstand 1,5, klare Gliederung, ein Auftrag pro Satz</p></div>
+      <div class="card"><h2>Sprache glätten</h2><p>Kurze Sätze, eindeutige Operatoren, reduzierte Textmenge bei gleichem Anspruch</p></div>
+      <div class="card"><h2>Aufgabenformate variieren</h2><p>Ankreuz-/Zuordnungsformate statt langer Schreibaufgaben – wo fachlich vertretbar</p></div>
+      <div class="card"><h2>Zugänge öffnen</h2><p>Vorlesefassung der Aufgaben (z. B. NotebookLM-Audio), Silbenmarkierung in Lesetexten</p></div>
+    </div>
+    <div class="box box-danger"><b>Achtung:</b> Ob die Rechtschreibung unbewertet bleibt, regelt der LRS-Erlass eures Landes – das entscheidet nicht die KI.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Zielgleich heißt: fachlicher Anspruch bleibt erhalten.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Prüffrage: Hat die KI nur den Zugang verändert – oder unbemerkt die Aufgabe leichter gemacht?</p>
+  `,
+        notes: "Beispiel zeigen: dieselbe Aufgabe vorher/nachher (KI-gerendert). Betonen: Alle Anpassungen verändern Bedingungen, nicht das fachliche Niveau – genau das prüft die Werkstatt auf AB 6."
+      },
+      {
+        kicker: "Modul 6 · Faire Lernerfolgskontrollen",
+        title: "KI bei sonderpädagogischem Förderbedarf",
+        body: `
+    <div class="cards">
+      <div class="card"><h2>Kleinschrittigkeit</h2><p>Komplexe Aufgaben in Teilschritte zerlegen, Beispielaufgabe als Einstieg</p></div>
+      <div class="card"><h2>Einfache Sprache</h2><p>Aufgaben automatisch in Leichte/Einfache Sprache übertragen lassen</p></div>
+      <div class="card"><h2>Visualisierung</h2><p>Bildimpulse, Piktogramme, Strukturhilfen vorschlagen lassen</p></div>
+      <div class="card"><h2>Drei Niveaustufen</h2><p>Eine Aufgabe – Basis-, Standard- und Expertenfassung mit gleichem Thema</p></div>
+    </div>
+    <div class="box box-merk"><b>Leitstern:</b> Grundlage ist immer der individuelle Förderplan – die KI liefert Varianten, die Sonderpädagogik liefert das Urteil.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Ausgangspunkt ist der individuelle Förderplan.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">KI erzeugt Varianten – sonderpädagogische Entscheidung bleibt menschlich.</p>
+  `,
+        notes: "Förderschwerpunkte differenziert ansprechen (Lernen, Sprache, ESE, GE). Wenn Sonderpädagog/innen anwesend sind: als Expert/innen einbinden. Wichtig: keine Diagnosen realer Kinder in Prompts – nur anonymisierte Bedarfsbeschreibungen."
+      },
+      {
+        kicker: "Modul 6 · Praxisphase",
+        title: "Werkstatt: Eine LEK, mehrere Fassungen",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Eigene mitgebrachte Lernerfolgskontrolle (ohne Schülerdaten!) in das Tool geben.</li>
+          <li>Mit der Prompt-Vorlage drei Fassungen erzeugen: Basis / LRS-angepasst / Förderfassung.</li>
+          <li>Kritischer Tandem-Check: Ist die LRS-Fassung wirklich zielgleich – oder wurde das Niveau gesenkt?</li>
+          <li>Abgleich mit den Vorgaben eures Bundeslandes (Erlass, Dokumentation).</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 6</div>
+        <div class="zeit">Zeit: 35 + 15 Minuten</div>
+        <div class="tip">Die KI weist auf Wunsch selbst aus, welche Änderungen das Anforderungsniveau berühren – einfordern!</div>
+      </div>
+    </div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Vergleich</span>
+      <p class="info-tags"><span>Basis</span><span>LRS-zielgleich</span><span>Förderfassung</span></p>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Kennzeichnet ausdrücklich, welche Änderung nur die Bedingung und welche das Anforderungsniveau betrifft.</p>
+  `,
+        notes: "Das ist das Herzstück des Nachmittags – Zeit großzügig schützen. Bei der Auswertung 2–3 Beispiele zeigen, in denen die KI unbemerkt das Niveau gesenkt hat: Das schärft den kritischen Blick mehr als jede Warnfolie."
+      },
+      {
+        kicker: "Modul 7 · Tool-Auswahl",
+        title: "Werkzeugkasten: der Themenpool",
+        body: `
+    <p class="lead">Wählt in eurer Gruppe EIN Tool aus dem Themenpool – dazu füllt ihr einen Steckbrief aus.</p>
+    <div class="stations">
+      <div class="station"><span class="snum">1</span><div><h3>telli / AIS.chat</h3><p>Chat, Unterrichtsideen, Texte – der Landeszugang</p></div></div>
+      <div class="station"><span class="snum">2</span><div><h3>fobizz / schulKI</h3><p>KI-Klassenräume, Materialien, Schülerzugänge</p></div></div>
+      <div class="station"><span class="snum">3</span><div><h3>fiete.ai</h3><p>KI-Feedback auf Schülertexte nach euren Kriterien</p></div></div>
+      <div class="station"><span class="snum">4</span><div><h3>to-teach.ai / Teachino</h3><p>Arbeitsblätter, Übungen, Differenzierung auf Knopfdruck</p></div></div>
+      <div class="station"><span class="snum">5</span><div><h3>DeepL Write / LanguageTool</h3><p>Sprache verbessern – auch als LRS-Unterstützung</p></div></div>
+      <div class="station"><span class="snum">6</span><div><h3>NotebookLM</h3><p>Quellenbasiert: aus euren Materialien Study Guides, Quiz und Podcasts erzeugen</p></div></div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Pro Tool nur: Wofür geeignet?</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Freigabe · Daten · Kosten · Grenzen immer separat prüfen.</p>
+  `,
+        notes: "Der Pool ist eine Auswahl, kein Ranking. Grundschullehrkräfte auf 1, 4, 5 hinweisen; Sek II eher 2, 3, 6. Gruppen dürfen auch ein eigenes, im Kollegium bereits genutztes Tool wählen und für dieses den Steckbrief ausfüllen. Verfügbarkeit je nach Bundesland/Lizenz vorab prüfen!"
+      },
+      {
+        kicker: "Modul 7 · Tool-Auswahl",
+        title: "Der Tool-Steckbrief",
+        body: `
+    <table class="deck-table">
+      <tr><th>Feld</th><th>Was ihr eintragt</th></tr>
+      <tr><td>Zweck</td><td>Wofür genau wird das Tool eingesetzt?</td></tr>
+      <tr><td>Quelle</td><td>Anbieter, Link, Kurzbeschreibung</td></tr>
+      <tr><td>An unserer Schule freigegeben?</td><td>ja / nein / ungeklärt</td></tr>
+      <tr><td>Konto nötig? (Lehrkraft)</td><td>ja / nein</td></tr>
+      <tr><td>Schülerkonto nötig?</td><td>ja / nein</td></tr>
+      <tr><td>Erlaubte Daten</td><td>z. B. nur fiktive oder anonymisierte Inhalte</td></tr>
+      <tr><td>Stärken</td><td>Wofür eignet sich das Tool besonders?</td></tr>
+      <tr><td>Grenzen</td><td>Wo stößt es an Grenzen?</td></tr>
+      <tr><td>Workflow</td><td>Kurzer Schritt-für-Schritt-Ablauf</td></tr>
+    </table>
+    <div class="box box-warn"><b>Beispiel NotebookLM:</b> quellenbasiert, kaum Halluzinationen – aber ein Google-Dienst ohne schulischen AVV-Rahmen wie telli. Statt pauschal „US-Server = verboten“ prüft ihr Kriterien: schulische Freigabe, Rechtsgrundlage, Datenminimierung, Auftragsverarbeitung (Art. 28 DSGVO), ggf. Drittlandtransfer. Deshalb steht beim Steckbrief oft ehrlich „ungeklärt“.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Quellenbindung reduziert freie Erfindungen, ersetzt aber nicht die Prüfung.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Urheberrecht · Datenschutz · Quellenqualität bleiben relevant.</p>
+  `,
+        notes: "Steckbrief-Felder gemeinsam durchgehen, bevor die Gruppen loslegen. „Ungeklärt“ ist eine vollwertige, sogar wichtige Antwort – sie zeigt der Schulleitung, wo noch Klärungsbedarf besteht. Betonen: kein Tool ist automatisch verboten, weil der Server im Ausland steht – die Kriterien aus Modul 2 (KI-Ampel, Art. 28 DSGVO) entscheiden. Verweis auf AB 5."
+      },
+      {
+        kicker: "Modul 7 · Praxisphase",
+        title: "Werkstatt: Euer Tool-Labor",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Wählt als Gruppe ein Tool aus dem Themenpool.</li>
+          <li>Testet es mit einer Aufgabe aus eurem Fach.</li>
+          <li>Füllt den Steckbrief auf AB 5 vollständig aus – auch wenn „ungeklärt“ die ehrliche Antwort ist.</li>
+          <li>Stellt euren Steckbrief kurz im Plenum vor.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 5</div>
+        <div class="zeit">Zeit: 35 Minuten</div>
+        <div class="tip">„Ungeklärt“ ist eine gültige und wichtige Antwort – sie zeigt, wo die Schule noch klären muss.</div>
+      </div>
+    </div>
+    <div class="info-secondary info-block">
+      <span class="info-label">Bewertungsfragen</span>
+      <p class="info-tags"><span>Nützlich?</span><span>verständlich?</span><span>fachlich belastbar?</span></p>
+    </div>
+    <p class="info-tertiary" style="margin-top:.4rem;">Nicht „bestes Tool“ suchen – passenden Workflow finden.</p>
+  `,
+        notes: "Ergebnis ist eine Sammlung von Steckbriefen als Grundlage für eine spätere Tool-Entscheidung im Kollegium. Bei der Vorstellung im Plenum besonders die „ungeklärt“-Fälle sammeln – das wird Thema für die Schulleitung/den Datenschutzbeauftragten."
+      },
+      {
+        kicker: "Modul 8 · Transfer",
+        title: "Wie es nach heute weitergehen kann",
+        body: `
+    <div class="cards">
+      <div class="card"><h2>Mikro-Fortbildungen</h2><p>15-Minuten-Impulse in Konferenzen: jede Woche ein Tool, ein Prompt, ein Trick</p></div>
+      <div class="card"><h2>KI-Schulkonzept</h2><p>Gemeinsame Regeln für Kollegium, Lernende und Eltern – statt Einzelkämpfertum</p></div>
+      <div class="card"><h2>KI-Curriculum Klasse 1–12</h2><p>Vom ersten Sprachassistenten-Gespräch bis zur Quellenkritik in der Oberstufe</p></div>
+      <div class="card"><h2>Follow-up-Reihe</h2><p>3 × 90 Min.: Erfahrungsaustausch · Vertiefung Inklusion · Prüfungskultur</p></div>
+      <div class="card"><h2>Strukturen klären</h2><p>Landeslizenzen (telli/AIS.chat, fobizz, schulKI), Datenschutzkonzept, Ansprechpersonen</p></div>
+      <div class="card"><h2>Denk-Kultur pflegen</h2><p>Anti-Skill-Skipping-Regeln mit SuS vereinbaren, Schüler-AB „Denkst du noch selbst?“ einsetzen</p></div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">Nicht alles gleichzeitig starten.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Ein sinnvoller nächster Schritt ist besser als zehn lose Vorhaben.</p>
+  `,
+        notes: "Hier andocken, was die Schule wirklich plant. Empfehlung: EIN Format konkret vereinbaren, bevor alle gehen (z. B. Mikro-Fortbildung ab nächster Konferenz). EU AI Act-Schulungspflicht als Argument für die Schulleitung mitgeben. Das Schüler-Arbeitsblatt zum Cognitive Offloading liegt fertig differenzierbar im Materialpaket."
+      },
+      {
+        kicker: "Modul 8 · Prüfungskultur",
+        title: "KI und Prüfungskultur",
+        body: `
+    <p class="lead">Prüfungskultur passt sich an KI an, statt sie zu ignorieren oder pauschal zu verbieten.</p>
+    <div class="compare">
+      <div class="col weak">
+        <h3>Pauschales Verbot</h3>
+        <ul>
+          <li>Verbietet auf dem Papier, ist praktisch kaum kontrollierbar.</li>
+          <li>Drängt Nutzung ins Verborgene statt sie sichtbar zu machen.</li>
+          <li>Bereitet SuS nicht auf den späteren KI-Alltag vor.</li>
+        </ul>
+      </div>
+      <div class="col strong">
+        <h3>Transparenz + Dokumentation + Prozessblick</h3>
+        <ul>
+          <li>Erlaubte/verbotene Hilfsmittel pro Aufgabe klar benennen.</li>
+          <li>KI-Nutzung dokumentieren lassen: welches Tool, wofür.</li>
+          <li>Prozess statt nur Endprodukt bewerten – Entwürfe, Prompts, Reflexion einbeziehen.</li>
+          <li>Kurze mündliche Verteidigung/Reflexion als Option, nicht als Generalverdacht.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="box box-warn"><b>Klarstellung:</b> Explizit KEINE pauschale KI-Verbotslogik – Prüfungsformate werden angepasst, nicht die Augen verschlossen.</div>
+    <p class="info-secondary" style="margin-top:.6rem;">Prozess und Produkt gemeinsam bewerten: Zwischenstände, Prompt-Reflexion, kurze mündliche Verteidigung.</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Ziel ist dokumentierte Eigenleistung, nicht Kontrollillusion durch Verbote.</p>
+  `,
+        notes: "Neuer Baustein in Modul 8, ergänzt AB 8 um den Abschnitt „KI und Prüfungskultur“. Diskussion anregen: Welche Aufgabenformate an unserer Schule sind KI-resistent (mündlich, prozessorientiert), welche nicht? Betonen: Ziel ist ehrlicher, kontrollierbarer Umgang statt Kontrollillusion durch Verbote."
+      },
+      {
+        kicker: "Modul 8 · Praxisphase",
+        title: "Euer persönlicher Aktionsplan",
+        body: `
+    <div class="praxis">
+      <div>
+        <ol>
+          <li>Drei konkrete Vorhaben für die nächsten 14 Tage festlegen – klein anfangen ist erlaubt!</li>
+          <li>Besten Prompt des Tages sichern (abfotografieren/abspeichern).</li>
+          <li>Eine Person aus dem Kollegium benennen, die ihr mitnehmt.</li>
+          <li>Stolperstein + Plan B notieren.</li>
+        </ol>
+      </div>
+      <div class="side-panel">
+        <div class="ab">AB 8</div>
+        <div class="zeit">Zeit: 20 Minuten</div>
+        <div class="tip">Forschung zu Fortbildungen zeigt: Ohne konkreten Umsetzungsplan verpufft der schönste Tag.</div>
+      </div>
+    </div>
+    <p class="info-secondary" style="margin-top:.6rem;">konkret · klein · terminierbar</p>
+    <p class="info-tertiary" style="margin-top:.3rem;">Wer unterstützt mich? Was ist mein Plan B?</p>
+  `,
+        notes: "Stille Einzelarbeit zulassen. Optional: Vorhaben in Murmelrunde teilen – öffentliches Commitment erhöht die Umsetzungswahrscheinlichkeit. Auf Follow-up-Termin verweisen, falls vereinbart. AB 1 (Deskilling-Selbstcheck) wurde bereits in Modul 1 bearbeitet; AB 8 (Mein Aktionsplan, jetzt inkl. Abschnitt „KI und Prüfungskultur“) ist die Vertiefung für zu Hause."
+      },
+      {
+        kicker: "Zum Mitnehmen",
+        title: "Wenn ihr nur sechs Dinge behaltet …",
+        body: `
+    <ol class="num-list" style="list-style:none;">
+      <li><span class="n">1</span><span class="t">Keine Schülerdaten in nicht freigegebene KI-Systeme – Pseudonymisierung reicht oft nicht.</span></li>
+      <li><span class="n">2</span><span class="t">KI-Ergebnisse sind Entwürfe: prüfen, anpassen, verantworten.</span></li>
+      <li><span class="n">3</span><span class="t">KARFF macht Prompts stark: Kontext, Aufgabe, Rolle, Format, Feinschliff.</span></li>
+      <li><span class="n">4</span><span class="t">Nachteilsausgleich verändert Bedingungen – nicht Anforderungen.</span></li>
+      <li><span class="n">5</span><span class="t">Erst denken, dann prompten – gegen Skill-Skipping und Deskilling.</span></li>
+      <li><span class="n">6</span><span class="t">Beziehung, Bewertung, Entscheidung: bleibt beim Menschen.</span></li>
+    </ol>
+    <p class="info-secondary" style="margin-top:.6rem;">Unterstützen · prüfen · transparent machen · verantwortlich entscheiden</p>
+  `,
+        notes: "Mit den Erwartungskarten vom Morgen abgleichen: Was wurde erfüllt, was nehmen wir in die Follow-ups? Regel 5 fasst den Denken-Block aus Modul 1 zusammen. Danach Feedbackrunde (Zielscheibe an der Pinnwand oder digitales Tool)."
+      },
+      {
+        kicker: "Abschluss",
+        title: "Danke für eure Neugier!",
+        cls: "closing",
+        body: `
+    <p class="lead info-primary" style="max-width:50ch;">Der beste Zeitpunkt anzufangen ist die nächste Unterrichtsvorbereitung.</p>
+    <p class="info-secondary" style="margin-top:.4rem;">Was probiert ihr als Erstes aus?</p>
+    <p class="info-tertiary">Feedback: Zielscheibe an der Pinnwand · Kontakt: [E-Mail]</p>
+    <p class="info-tertiary" style="font-size:.9rem;">Materialien: Ablaufplan · AB 1–8 (inkl. AB 4A–4E) · Schüler-AB „Denkst du noch selbst?“ · Vorlagen &amp; Hilfekarten · diese Präsentation</p>
+    <p style="color:var(--sub); font-size:.78rem; font-style:italic;">Erstellungshinweis: Mit Unterstützung generativer KI erstellt; fachlich und didaktisch geprüft und überarbeitet.</p>
+  `,
+        notes: "Verabschiedung. Materialien digital teilen (Schulcloud). Falls Follow-up vereinbart: Termin nennen. Letzter Satz: Probiert EINE Sache in den nächsten 14 Tagen aus – mehr braucht es nicht für den Anfang."
+      }
+    ];
+
+
+    /* ---------- scrollytelling image map ---------- */
+    const STORY_ASSETS = {
+      welcome: 'assets/ki-fortbildung/titel-ki-im-schulalltag.png',
+      model: 'assets/ki-fortbildung/sprachmodell-naechstes-wort.png',
+      thinking: 'assets/ki-fortbildung/denken-mit-ki.png',
+      privacy: 'assets/ki-fortbildung/datenschutz-schuelerdaten.png',
+      prompting: 'assets/ki-fortbildung/prompting-struktur.png',
+      tools: 'assets/ki-fortbildung/tool-landschaft.png',
+      planning: 'assets/ki-fortbildung/halbjahresplanung.png',
+      inclusion: 'assets/ki-fortbildung/faire-differenzierung.png',
+      conversation: 'assets/ki-fortbildung/lernentwicklungsgespraech.png',
+      transfer: 'assets/ki-fortbildung/transfer-schulkultur.png'
+    };
+    const STORY_IMAGE_KEYS = [
+      'welcome', 'welcome', 'welcome',
+      'model', 'model', 'model',
+      'thinking', 'thinking', 'thinking', 'thinking',
+      'privacy', 'privacy', 'privacy', 'privacy', 'privacy',
+      'prompting', 'prompting', 'prompting', 'prompting',
+      'planning', 'planning', 'planning', 'planning',
+      'tools', 'tools', 'tools',
+      'inclusion', 'inclusion', 'inclusion', 'inclusion',
+      'conversation', 'conversation', 'conversation',
+      'transfer', 'transfer', 'transfer', 'transfer', 'transfer',
+      'transfer', 'transfer', 'transfer', 'transfer', 'transfer'
+    ];
+    const STORY_FEATURE_SLIDES = new Set([0, 2, 3, 6, 9, 11, 12, 15, 16, 19, 20, 22, 28, 30, 31, 34, 35, 37, 38, 40, 42]);
+
+    Object.values(STORY_ASSETS).forEach(src => { const preload = new Image(); preload.src = src; });
+
+    /* ---------- true viewport height (avoids OS chrome clipping content) ---------- */
+    function setAppHeight() {
+      document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+    }
+    setAppHeight();
+    window.addEventListener('resize', setAppHeight);
+    window.addEventListener('orientationchange', setAppHeight);
+    if (window.visualViewport) { window.visualViewport.addEventListener('resize', setAppHeight); }
+
+    /* ---------- render ---------- */
+    const deck = document.getElementById('deck');
+    SLIDES.forEach((s, i) => {
+      const el = document.createElement('section');
+      el.className = 'slide' + (s.cls ? ' ' + s.cls : '');
+      if ((s.kicker || '').includes('Praxisphase')) el.classList.add('slide-pink');
+      if (s.kicker === 'Zum Mitnehmen') el.classList.add('slide-summary');
+      el.classList.add(STORY_FEATURE_SLIDES.has(i) ? 'story-feature' : 'story-ambient');
+      el.id = 'slide-' + i;
+      el.innerHTML = `
+    <div class="kicker">${s.kicker}</div>
+    <h1 class="title">${s.title}</h1>
+    ${s.subtitle ? `<p class="subtitle">${s.subtitle}</p>` : ''}
+    <div class="content">${s.body}</div>
+  `;
+      deck.appendChild(el);
+    });
+
+    /* Angaben aus der Startseite (index.html) übernehmen */
+    (function befuelleVeranstaltungsangaben() {
+      let daten = {};
+      try { daten = JSON.parse(localStorage.getItem('ki-fortbildung-veranstaltung')) || {}; }
+      catch (e) { daten = {}; }
+      const metaEl = document.querySelector('#slide-0 .meta');
+      if (!metaEl) return;
+      let datumText = '[Datum]';
+      if (daten.datum) {
+        const d = new Date(daten.datum + 'T00:00:00');
+        if (!isNaN(d)) datumText = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      }
+      const teile = [daten.referent || '[Name]', datumText, daten.ort || '[Ort]'];
+      metaEl.textContent = teile.join(' · ');
+    })();
+
+    const overviewGrid = document.getElementById('overview-grid');
+    SLIDES.forEach((s, i) => {
+      const item = document.createElement('div');
+      item.className = 'ov-item';
+      item.innerHTML = `<div class="n">${i + 1} / ${SLIDES.length}</div><div class="t">${s.title}</div>`;
+      item.addEventListener('click', () => { goTo(i); toggleOverview(false); });
+      overviewGrid.appendChild(item);
+    });
+
+    document.getElementById('total-num').textContent = SLIDES.length;
+
+    const SLIDE_STORAGE_KEY = 'ki-fortbildung-praesentation-folie';
+    function initialSlideIndex() {
+      const fromUrl = parseInt(new URLSearchParams(location.search).get('folie'), 10);
+      if (!Number.isNaN(fromUrl)) return Math.max(0, Math.min(SLIDES.length - 1, fromUrl));
+      const stored = parseInt(localStorage.getItem(SLIDE_STORAGE_KEY), 10);
+      if (!Number.isNaN(stored)) return Math.max(0, Math.min(SLIDES.length - 1, stored));
+      return 0;
+    }
+
+    let current = initialSlideIndex();
+    const slideEls = document.querySelectorAll('.slide');
+
+    /* ---------- Klick-Reveal (Accordion) — nur noch für echte Auflösungen, keine Auto-Rotation mehr (v3) ---------- */
+    document.querySelectorAll('.reveal-trigger').forEach(btn => {
+      const panel = document.getElementById(btn.getAttribute('aria-controls'));
+      if (!panel) return;
+      btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!expanded));
+        panel.hidden = expanded;
+      });
+    });
+
+    const mask = document.getElementById('progress-mask');
+    const dot = document.getElementById('progress-dot');
+    const storyMedia = document.getElementById('story-media');
+    const storyLayers = [...storyMedia.querySelectorAll('.story-layer')];
+    let activeStoryLayer = 0;
+    let activeStorySrc = '';
+    let storyDrift = false;
+
+    function storySource(index) {
+      return STORY_ASSETS[STORY_IMAGE_KEYS[index] || 'welcome'];
+    }
+
+    function setStoryVisual(index, direction = 1, immediate = false) {
+      const src = storySource(index);
+      const feature = STORY_FEATURE_SLIDES.has(index);
+      storyMedia.classList.toggle('feature', feature);
+      storyMedia.classList.toggle('ambient', !feature);
+
+      if (src === activeStorySrc && !immediate) {
+        storyDrift = !storyDrift;
+        const layer = storyLayers[activeStoryLayer];
+        layer.classList.toggle('drift-alt', storyDrift);
+        layer.querySelector('.story-caption').innerHTML = SLIDES[index].kicker;
+        return;
+      }
+
+      const nextLayerIndex = immediate ? activeStoryLayer : 1 - activeStoryLayer;
+      const nextLayer = storyLayers[nextLayerIndex];
+      const oldLayer = storyLayers[activeStoryLayer];
+      const enterClass = direction < 0 ? 'enter-prev' : 'enter-next';
+      const exitClass = direction < 0 ? 'exit-prev' : 'exit-next';
+
+      if (nextLayer._cleanupTimer) clearTimeout(nextLayer._cleanupTimer);
+      nextLayer.className = `story-layer ${enterClass}`;
+      nextLayer.querySelector('img').src = src;
+      nextLayer.querySelector('.story-caption').innerHTML = SLIDES[index].kicker;
+      void nextLayer.offsetWidth;
+
+      if (immediate) {
+        nextLayer.className = 'story-layer active';
+      } else {
+        oldLayer.classList.remove('active', 'drift-alt');
+        oldLayer.classList.add(exitClass);
+        requestAnimationFrame(() => {
+          nextLayer.classList.add('active');
+          nextLayer.classList.remove(enterClass);
+        });
+        if (oldLayer._cleanupTimer) clearTimeout(oldLayer._cleanupTimer);
+        oldLayer._cleanupTimer = setTimeout(() => {
+          if (!oldLayer.classList.contains('active')) oldLayer.className = 'story-layer';
+        }, 1100);
+      }
+
+      activeStoryLayer = nextLayerIndex;
+      activeStorySrc = src;
+      storyDrift = false;
+    }
+
+    function render(previous = null, direction = 0) {
+      if (previous === null) {
+        slideEls.forEach((el, i) => el.classList.toggle('active', i === current));
+        setStoryVisual(current, 1, true);
+      } else {
+        const oldSlide = slideEls[previous];
+        const nextSlide = slideEls[current];
+        const enterClass = direction < 0 ? 'enter-prev' : 'enter-next';
+        const exitClass = direction < 0 ? 'exit-prev' : 'exit-next';
+        slideEls.forEach((el, i) => {
+          if (i !== previous && i !== current) el.classList.remove('active', 'enter-next', 'enter-prev', 'exit-next', 'exit-prev');
+        });
+        oldSlide.classList.remove('active', 'enter-next', 'enter-prev', 'exit-next', 'exit-prev');
+        oldSlide.classList.add(exitClass);
+        nextSlide.classList.remove('exit-next', 'exit-prev');
+        nextSlide.classList.add(enterClass);
+        void nextSlide.offsetWidth;
+        requestAnimationFrame(() => {
+          nextSlide.classList.add('active');
+          nextSlide.classList.remove(enterClass);
+        });
+        setTimeout(() => { oldSlide.classList.remove(exitClass); }, 760);
+        setStoryVisual(current, direction, false);
+      }
+      const activeSlide = slideEls[current];
+      const isDark = activeSlide.classList.contains('cover') || activeSlide.classList.contains('closing') || activeSlide.classList.contains('slide-summary');
+      const isAccent = activeSlide.classList.contains('slide-pink');
+      document.body.classList.toggle('dark-slide', isDark);
+      document.body.classList.toggle('accent-slide', isAccent);
+      document.getElementById('cur-num').textContent = current + 1;
+      document.getElementById('title-mini').textContent = SLIDES[current].kicker.replace(/&amp;/g, '&');
+      document.getElementById('notes-body').textContent = SLIDES[current].notes || '(keine Notizen)';
+      const total = SLIDES.length - 1;
+      const t = total === 0 ? 1 : current / total;
+      const vh = window.innerHeight;
+      mask.style.top = (t * vh) + 'px';
+      dot.style.top = (t * vh) + 'px';
+      dot.style.borderColor = isDark ? 'var(--accent-a)' : 'var(--fach)';
+      dot.style.background = isAccent ? 'var(--fach)' : 'var(--accent-a)';
+      slideEls[current].scrollTop = 0;
+    }
+
+    function goTo(i) {
+      const target = Math.max(0, Math.min(SLIDES.length - 1, i));
+      if (target === current) return;
+      const previous = current;
+      const direction = target > current ? 1 : -1;
+      current = target;
+      localStorage.setItem(SLIDE_STORAGE_KEY, String(current));
+      render(previous, direction);
+    }
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    document.getElementById('next-btn').addEventListener('click', next);
+    document.getElementById('prev-btn').addEventListener('click', prev);
+
+    function toggleNotes(force) {
+      const d = document.getElementById('notes-drawer');
+      d.classList.toggle('open', force !== undefined ? force : !d.classList.contains('open'));
+    }
+    function toggleOverview(force) {
+      const o = document.getElementById('overview');
+      o.classList.toggle('open', force !== undefined ? force : !o.classList.contains('open'));
+    }
+    function toggleFullscreen() {
+      const el = document.documentElement;
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFs) {
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('overview').classList.contains('open')) {
+        if (e.key === 'Escape' || e.key.toLowerCase() === 'o') { toggleOverview(false); }
+        return;
+      }
+      switch (e.key) {
+        case 'ArrowRight': case ' ': case 'PageDown': next(); e.preventDefault(); break;
+        case 'ArrowLeft': case 'PageUp': prev(); e.preventDefault(); break;
+        case 'Home': goTo(0); break;
+        case 'End': goTo(SLIDES.length - 1); break;
+        case 'n': case 'N': toggleNotes(); break;
+        case 'o': case 'O': toggleOverview(true); break;
+        case 'f': case 'F': toggleFullscreen(); break;
+        case 'Escape': toggleNotes(false); break;
+      }
+    });
+
+    let touchX = 0;
+    document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+    document.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (dx > 60) prev(); else if (dx < -60) next();
+    });
+
+    window.addEventListener('resize', () => render());
+    render();
+  </script>
+</body>
+
+</html>
